@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Rice — interactive brand study</title>
+  <style>
+    :root{color-scheme:dark;--ground:#101113;--ink:#f4f2ed;--muted:#a09f9a;--gold:#e8bc58}
+    *{box-sizing:border-box}body{margin:0;background:var(--ground);color:var(--ink);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    main{max-width:1040px;margin:auto;padding:36px 32px 28px}header{display:flex;align-items:center;justify-content:space-between;gap:24px}
+    h1{font-size:23px;letter-spacing:-.025em;font-weight:600;margin:0}header p{color:var(--muted);margin:3px 0 0;font-size:13px}
+    .tag{font-size:12px;color:var(--muted);white-space:nowrap}.stage{position:relative;min-height:380px;display:grid;place-items:center;margin:22px 0 6px;border-radius:24px;background:#090a0b;overflow:hidden}
+    .grain-button{border:0;background:none;color:inherit;padding:0;cursor:pointer;width:320px;height:320px;touch-action:manipulation}
+    .grain-button:focus-visible{outline:2px solid var(--gold);outline-offset:8px;border-radius:50%}svg{display:block;overflow:visible;width:100%;height:100%}
+    .state{position:absolute;bottom:22px;left:28px;font-size:13px;color:var(--muted)}.note{position:absolute;bottom:22px;right:28px;font-size:12px;color:var(--muted)}
+    nav{display:flex;gap:6px;flex-wrap:wrap;margin-top:18px}button.state-button{font:inherit;font-size:13px;border:1px solid #363739;color:#bfc0bc;background:transparent;padding:8px 13px;border-radius:999px;cursor:pointer}
+    button.state-button[aria-pressed=true]{background:#e8bc58;color:#211a0e;border-color:#e8bc58}button.state-button:active{transform:scale(.97)}button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+    .tools{display:flex;gap:20px;flex-wrap:wrap;margin:22px 0 0;color:var(--muted);font-size:13px}.tools label{display:flex;align-items:center;gap:7px;cursor:pointer}input{accent-color:var(--gold)}
+    footer{margin-top:24px;padding-top:20px;border-top:1px solid #303133;display:flex;gap:36px;align-items:center;color:var(--muted);font-size:12px}footer p{margin:0;max-width:490px}.small{display:flex;gap:20px;align-items:center}.mini{width:36px;height:36px}.icon{width:64px;height:64px;background:#090a0b;border-radius:16px;padding:5px}
+    @media(max-width:620px){main{padding:24px 18px}header{align-items:flex-start}.tag{display:none}.stage{min-height:330px}.grain-button{width:270px;height:270px}.note{display:none}footer{gap:20px;align-items:flex-start;flex-direction:column}}
+    @media(prefers-reduced-motion:reduce){button.state-button:active{transform:none}}
+  </style>
+</head>
+<body>
+<!-- Local, narrowly scoped brand study: original white/gold rice oval and protruding dot eyes.
+     Existing Coucou application remains unchanged. Simulated states, no live agent connection. -->
+<main>
+  <header><div><h1>เมล็ดข้าว • Rice</h1><p>ลองคาแรคเตอร์ AI แบบ 2D — ขาว ทอง และแสงนุ่ม ๆ</p></div><span class="tag">Interactive brand study / 01</span></header>
+  <section class="stage" aria-label="พื้นที่ทดลองเมล็ดข้าว">
+    <button class="grain-button" aria-label="แตะเมล็ดข้าวให้เด้งเบา ๆ" id="grain">
+      <svg viewBox="0 0 320 320" role="img" aria-label="เมล็ดข้าววงรีสีขาวทอง ตาจุดลอยพ้นขอบ">
+        <defs>
+          <linearGradient id="riceFill" x1="0" y1="0" x2=".85" y2="1" gradientUnits="objectBoundingBox"><stop stop-color="#fffef6"/><stop offset=".52" stop-color="#fff2c7"/><stop offset="1" stop-color="#d7a843"/></linearGradient>
+          <linearGradient id="riceEdge" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffbee"/><stop offset="1" stop-color="#ecbd5b"/></linearGradient>
+          <radialGradient id="halo"><stop stop-color="#f3c974" stop-opacity=".42"/><stop offset=".45" stop-color="#e8bc58" stop-opacity=".12"/><stop offset="1" stop-color="#e8bc58" stop-opacity="0"/></radialGradient>
+          <radialGradient id="floor"><stop stop-color="#d8ab4d" stop-opacity=".14"/><stop offset="1" stop-color="#d8ab4d" stop-opacity="0"/></radialGradient>
+        </defs>
+        <ellipse cx="160" cy="263" rx="96" ry="15" fill="url(#floor)"/>
+        <g id="ricePose">
+          <ellipse id="riceHalo" rx="126" ry="142" fill="url(#halo)"/>
+          <g id="riceShape">
+            <path d="M0 -82 C29 -81 45 -42 45 -4 C45 43 21 80 0 83 C-24 79 -44 42 -44 -3 C-44 -44 -27 -80 0 -82Z" fill="url(#riceFill)" stroke="url(#riceEdge)" stroke-width="1.5"/>
+            <path d="M-13 -62 C-24 -32 -24 29 -9 58" fill="none" stroke="#fffdf3" stroke-opacity=".46" stroke-width="2" stroke-linecap="round"/>
+            <path d="M12 -64 C21 -28 21 28 9 62" fill="none" stroke="#b58a32" stroke-opacity=".13" stroke-width="1.3" stroke-linecap="round"/>
+          </g>
+          <g id="riceEyes">
+            <ellipse class="pupil" cx="34" cy="8" rx="4.6" ry="5.3" fill="#7c5b28" stroke="#fff1c6" stroke-width="1.2"/>
+            <ellipse class="pupil" cx="53" cy="14" rx="4.6" ry="5.3" fill="#7c5b28" stroke="#fff1c6" stroke-width="1.2"/>
+          </g>
+          <g id="signal" opacity="0"><circle cx="72" cy="-33" r="3" fill="#ffe7a6"/><circle cx="88" cy="-44" r="2" fill="#ffe7a6"/><circle cx="102" cy="-51" r="1.5" fill="#ffe7a6"/></g>
+        </g>
+      </svg>
+    </button>
+    <span class="state" id="state-label" role="status">พร้อมทำงาน</span><span class="note">ขยับเมาส์ใกล้ ๆ หรือแตะเมล็ดข้าว</span>
+  </section>
+  <nav aria-label="ทดลองสถานะ" id="states"></nav>
+  <div class="tools"><label><input type="checkbox" id="reduced">ลดการเคลื่อนไหว</label><label><input type="checkbox" id="pause">พักแอนิเมชัน</label></div>
+  <footer><div class="small"><div class="icon" id="icon" aria-label="ตัวอย่างไอคอน"></div><div class="mini" id="mini" aria-label="ตัวอย่างขนาด notch"></div></div><p>ภาพและสถานะจำลองเพื่อเลือกแบรนด์ ไม่ได้เชื่อมกับเอเจนต์จริง<br>วาดด้วย vector + spring physics — ไม่มีวิดีโอ โมเดล 3D หรือ API</p></footer>
+</main>
+<script type="module">
+  import { RiceMotion } from './motion.mjs';
+  const motion = new RiceMotion();
+  const labels = {idle:'พร้อมทำงาน',thinking:'กำลังคิด',working:'กำลังทำงาน',sending:'กำลังส่งต่อ',approval:'รอคุณอนุมัติ',done:'เสร็จแล้ว',resting:'พักก่อน'};
+  const pose = document.querySelector('#ricePose'), shape = document.querySelector('#riceShape'), eyes = document.querySelector('#riceEyes');
+  const halo = document.querySelector('#riceHalo'), label = document.querySelector('#state-label'), signal = document.querySelector('#signal');
+  const grain = document.querySelector('#grain'), reduced = document.querySelector('#reduced'), pause = document.querySelector('#pause');
+  const media = matchMedia('(prefers-reduced-motion: reduce)'); reduced.checked = media.matches;
+  media.addEventListener('change', e => { reduced.checked = e.matches; restart(); });
+  for (const [state,text] of Object.entries(labels)) {
+    const b = document.createElement('button'); b.textContent=text; b.className='state-button'; b.dataset.state=state; b.setAttribute('aria-pressed',String(state==='idle'));
+    b.addEventListener('click',()=>{
+      motion.select(state); label.textContent=text;
+      document.querySelectorAll('[data-state]').forEach(button=>button.setAttribute('aria-pressed',String(button===b)));
+      restart();
+    }); document.querySelector('#states').append(b);
+  }
+  // Prefix every SVG ID per clone; separate gradients still work in icon sizes.
+  const clones = ['icon','mini'].map(id => {
+    const svg=grain.querySelector('svg').cloneNode(true); svg.removeAttribute('role'); svg.setAttribute('aria-hidden','true');
+    svg.querySelectorAll('[id]').forEach(el=>el.id=id+'-'+el.id);
+    svg.querySelectorAll('[fill],[stroke]').forEach(el=>['fill','stroke'].forEach(attr=>{const value=el.getAttribute(attr);if(value?.startsWith('url(#'))el.setAttribute(attr,value.replace('url(#','url(#'+id+'-'));}));
+    document.querySelector('#'+id).append(svg); return svg;
+  });
+  let gaze=0, gazeY=0, previous=0, raf=0;
+  grain.addEventListener('pointermove',event=>{
+    const r=grain.getBoundingClientRect(); gaze=Math.tanh((event.clientX-r.left-r.width/2)/100)*3; gazeY=Math.tanh((event.clientY-r.top-r.height/2)/100)*2; restart();
+  });
+  grain.addEventListener('pointerleave',()=>{gaze=gazeY=0;restart();});
+  grain.addEventListener('pointerdown',()=>{
+    if (!reduced.checked) { motion.springs.sy.velocity=-1.4; motion.springs.sx.velocity=.7; } restart();
+  });
+  grain.addEventListener('click',event=>{if(event.detail===0){motion.springs.sy.velocity=-1.4;restart();}});
+  function draw(time){
+    raf=0; const dt=previous?Math.min((time-previous)/1000,.05):0; previous=time;
+    const v=motion.frame(dt,reduced.checked,pause.checked);
+    pose.setAttribute('transform',`translate(${160+v.x} ${160+v.y}) rotate(${v.angle})`);
+    shape.setAttribute('transform',`scale(${v.sx} ${v.sy})`);
+    eyes.setAttribute('transform',`translate(${gaze+v.gaze} ${gazeY})`);
+    const blink = !reduced.checked && !pause.checked && (motion.elapsed % 4.4 > 4.23);
+    document.querySelectorAll('.pupil').forEach(p=>p.setAttribute('ry',motion.state==='resting'||blink?'1.2':'5.3'));
+    halo.setAttribute('opacity',String(v.glow)); signal.setAttribute('opacity',motion.state==='sending'?'1':'0');
+    clones.forEach(svg=>{
+      svg.querySelector('[id$="ricePose"]').setAttribute('transform',`translate(160 160) rotate(${v.angle})`);
+      svg.querySelector('[id$="riceShape"]').setAttribute('transform',`scale(${v.sx} ${v.sy})`);
+    });
+    if (!document.hidden && !pause.checked && !reduced.checked) raf=requestAnimationFrame(draw);
+  }
+  function restart(){if(!raf){previous=0;raf=requestAnimationFrame(draw);}}
+  reduced.addEventListener('change',restart); pause.addEventListener('change',restart);
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;previous=0;}else restart();});
+  restart();
+  window.ricePreview = { select(state){ document.querySelector(`[data-state="${state}"]`)?.click(); }, get state(){return motion.state;} };
+</script>
+</body>
+</html>
