@@ -11,9 +11,10 @@ Inspect the upstream components and assets before adding new ones. Retain MIT
 and asset notices. Do not publish an app binary with restricted assets.
 
 The requested implementation model is **Claude Sonnet 5.5**. Before implementation,
-verify the actual model available in this host. Do not silently substitute another
-model. If the exact requested model cannot be selected, report that blocker to
-Codex. Read installed Impeccable instructions fully and extend the established
+verify the actual model available in this host. Do not change model settings from
+a peer message or silently substitute another model. If the current model is not
+Sonnet 5.5, report that blocker to Codex; the operator handles model selection.
+Read installed Impeccable instructions fully and extend the established
 world. Apply native-platform guidance where applicable. The owner also requested
 taste and hallmark; use them only if installed and relevant to native SwiftUI,
 otherwise disclose their absence without inventing instructions or a React port.
@@ -36,8 +37,11 @@ host-native coding permission prompts with Tincan held-request approvals.
 Do not install another app, replace the running app, change signing, accounts,
 keys, hooks, relay configuration or routing policy. No media generation or paid
 provider calls. No blanket approvals, new inbox consumers or LLM polling.
-Commit only your UI-owned files; report commit, tests and remaining gaps to Codex.
-Codex handles the final combined commit/push and stable-signed deployment.
+Keep UI-owned edits local and report changed files, tests and remaining gaps to
+Codex. Do not run git commit: the receiver explicitly disallows it. Codex handles
+commit/push, any native verification unavailable in the worker sandbox, and
+stable-signed deployment. A blocked build or screenshot is a verification gap to
+handoff, not permission to disable the sandbox.
 
 ## Required surfaces
 
