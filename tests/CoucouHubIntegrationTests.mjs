@@ -11,7 +11,8 @@ test('Coucou integration reuses one existing Hub model and is not an inbox consu
   assert.match(code, /static let shared/);
   assert.match(code, /model\.panelHidden\(\)/);
   assert.doesNotMatch(code, /Process\(|check_inbox\(|tincan claim|\/api\/.*claim/);
-  assert.match(code, /embedded: true/);
+  assert.match(code, /CoucouAgentWorkspace\(/);
+  assert.doesNotMatch(code, /HubIslandDashboardView\(/);
 });
 test('Coucou host owns metadata polling lifecycle, not a second window', () => {
   const delegate = source('Sources/App/AppDelegate.swift');
@@ -29,10 +30,17 @@ test('merged target preserves installed identity and excludes standalone entry p
   assert.match(target, /"HubIslandWindowController\.swift"/);
   assert.match(target, /SWIFT_ACTIVE_COMPILATION_CONDITIONS: COUCOU_HUB/);
 });
-test('embedded dashboard keeps existing exact-request approval predicate', () => {
-  const dashboard = source('Sources/HubIsland/HubIslandDashboard.swift');
-  assert.match(dashboard, /var embedded = false/);
-  assert.match(dashboard, /model\.canDecideSelectedTincanTask/);
-  assert.match(dashboard, /if !embedded/);
+test('Coucou-native workspace keeps exact-request approval predicate and primitives', () => {
+  const pane = source('Sources/App/CoucouAgentPane.swift');
+  assert.match(pane, /model\.canDecideSelectedTincanTask/);
+  assert.match(pane, /model\.decideSelectedTincanTask/);
+  assert.match(pane, /CardBackground\(/);
+  assert.match(pane, /AgentPill\(/);
+  const row = pane.split('private func transferRow(')[1].split('// MARK: Transfer detail')[0];
+  assert.doesNotMatch(row, /entry\.(title|body)/);
+  assert.doesNotMatch(pane, /Process\(|check_inbox\(/);
+  assert.match(pane, /ForEach\(detail\.steps\)/);
+  assert.doesNotMatch(pane, /detail\.steps\.prefix/);
   assert.match(source('Sources/App/IslandRootView.swift'), /hubModel\.heldRequestCount/);
+  assert.match(source('Sources/App/IslandWindowController.swift'), /#if COUCOU_HUB\s+return \.linkHub/);
 });

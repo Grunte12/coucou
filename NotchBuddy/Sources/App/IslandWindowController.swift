@@ -473,7 +473,7 @@ final class IslandWindowController: NSWindowController {
                 let pressed = event.modifierFlags.intersection([.command, .control, .option, .shift]).rawValue
                 guard pressed == self.state.hotkeyFlags, event.keyCode == self.state.hotkeyCode else { return }
                 if self.state.mode == .hidden || self.state.mode == .compact {
-                    self.expand(to: .overview)
+                    self.expand(to: self.defaultView())
                 }
             }
         }
@@ -687,7 +687,11 @@ final class IslandWindowController: NSWindowController {
     // MARK: - Helpers
 
     func defaultView() -> IslandView {
+        #if COUCOU_HUB
+        return .linkHub
+        #else
         state.tasks.isEmpty ? .empty : .overview
+        #endif
     }
 
     func baseMode() -> IslandMode {
@@ -727,7 +731,7 @@ final class IslandWindowController: NSWindowController {
             guard let self else { return }
             self.state.stateOverride = nil
             if self.state.view == .confused {
-                let fallback = self.state.tasks.isEmpty ? IslandView.empty : .overview
+                let fallback = self.defaultView()
                 self.state.view = (prevView == .confused) ? fallback : prevView
             }
             NotificationCenter.default.post(name: .triggerEmote, object: BotEmote.happy)

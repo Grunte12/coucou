@@ -23,17 +23,13 @@ struct CoucouHubPane: View {
     @ObservedObject private var model = CoucouHubIntegration.shared.model
 
     var body: some View {
-        HubIslandDashboardView(
+        CoucouAgentWorkspace(
             model: model,
-            geometry: IslandScreenGeometry(screenWidth: 640,
-                                          safeAreaTop: state.hasNotch ? state.notchHeight : 0,
-                                          auxiliaryLeftWidth: nil, auxiliaryRightWidth: nil,
-                                          menuBarHeight: state.notchHeight),
+            state: state,
             onOpenConsole: { NSWorkspace.shared.open(HubIslandEndpoint.console) },
             onClose: {
                 NotificationCenter.default.post(name: .coucouHubCollapse, object: nil)
-            },
-            embedded: true
+            }
         )
         .task {
             model.refresh()

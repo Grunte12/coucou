@@ -78,3 +78,12 @@ swiftc -sdk "$SDK_PATH" -target arm64-apple-macosx15.0 \
   "$PROJECT_DIR/tests/HubIslandMotionSoundTests.swift" \
   -o "$BUILD_DIR/HubIslandMotionSoundTests"
 "$BUILD_DIR/HubIslandMotionSoundTests"
+
+swiftc -sdk "$SDK_PATH" -target arm64-apple-macosx15.0 \
+  -swift-version 6 -strict-concurrency=complete -D COUCOU_HUB \
+  -module-cache-path "$MODULE_CACHE" -framework Security \
+  "$PROJECT_DIR/Sources/HubIsland/HubIslandClient.swift" \
+  "$PROJECT_DIR/Sources/App/CoucouHubFormat.swift" \
+  "$PROJECT_DIR/tests/CoucouAgentPaneTests.swift" \
+  -o "$BUILD_DIR/CoucouAgentPaneTests"
+"$BUILD_DIR/CoucouAgentPaneTests"

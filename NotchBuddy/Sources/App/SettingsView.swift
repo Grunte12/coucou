@@ -387,6 +387,7 @@ struct SettingsView: View {
                 }
 
                 // MARK: Active pills
+                #if !COUCOU_HUB
                 GroupBox("Active pills") {
                     VStack(alignment: .leading, spacing: 10) {
                         HStack {
@@ -428,6 +429,7 @@ struct SettingsView: View {
                     }
                     .padding(6)
                 }
+                #endif
 
                 // MARK: Hotkey
                 GroupBox("Hotkey") {

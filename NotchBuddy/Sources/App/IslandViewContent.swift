@@ -129,6 +129,9 @@ struct OverviewView: View {
         guard let task else { return }
         switch task.id {
         case "integration_claude":
+            #if COUCOU_HUB
+            return  // no editor jump in the agent workspace
+            #endif
             let vscodeBundleId = "com.microsoft.VSCode"
             if let app = NSWorkspace.shared.runningApplications.first(where: { $0.bundleIdentifier == vscodeBundleId }) {
                 app.activate(options: .activateIgnoringOtherApps)
@@ -1126,7 +1129,7 @@ struct IntegrationCardView: View {
                     Circle()
                         .fill(Color(hex: task.color))
                         .frame(width: 7, height: 7)
-                    Text(task.id == "integration_claude" ? "VS Code" : task.name)
+                    Text(task.name)
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundColor(Color(hex: "#F5F6F8"))
                     Text("Integration")
@@ -1156,10 +1159,16 @@ struct IntegrationCardView: View {
 
                 HStack(spacing: 8) {
                     if task.id == "integration_claude" {
+                        #if COUCOU_HUB
+                        Text("Watching Claude Code sessions")
+                            .font(.system(size: 11))
+                            .foregroundColor(Color(hex: "#6B7079"))
+                        #else
                         Button("Open Visual Studio Code") { openVSCode() }
                             .font(.system(size: 11, weight: .medium))
                             .foregroundColor(Color(hex: task.color).opacity(0.7))
                             .buttonStyle(.plain)
+                        #endif
                     } else if n8nHasActivity {
                         // Clickable pill — tap to open execution detail
                         let success = task.state == .finished
@@ -2291,7 +2300,11 @@ struct AgentPill: View {
 
     // VS Code pill always shows "VS Code" label regardless of active project name
     private var displayName: String {
+        #if COUCOU_HUB
+        task.name
+        #else
         task.id == "integration_claude" ? "VS Code" : task.name
+        #endif
     }
 
     var body: some View {

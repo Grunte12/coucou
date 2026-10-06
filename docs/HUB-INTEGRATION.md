@@ -13,7 +13,7 @@ test surface, not the final visual design.
 ## Build boundary
 
 `CoucouHub` builds the existing Coucou entry point, window, state machine,
-character and hook UI with an embedded Tools / Activity / Tasks pane. That pane
+character and hook UI with an Agents / Trail / MCP / Review workspace. That pane
 reuses the existing Hub client and model rather than starting another window or
 claiming agent inboxes. `COUCOU_HUB` confines the integration to this target.
 The legacy `HubIsland` target is retained temporarily for rollback only; do not
@@ -68,7 +68,26 @@ events; no approval buttons were offered for that answered task. Only one
 canonical notch process was running. No fresh Keychain prompt was observed in
 this launch. Private screenshots and task data are not published in this fork.
 
-Still pending: live integrated approval checks with an isolated held request,
+Claude Sonnet 5.5 subsequently implemented the Coucou-native workspace. The
+default expanded home now opens it, irrelevant integration pollers do not start
+in the integrated target, and the legacy dashboard is no longer rendered.
+Mochi pills use real joined identities, Trail hides message content until opened,
+MCP is informational, and Review retains exact held-request predicates. New
+helper tests cover stable identity colours, diagnostic filtering and chronological
+ordering including fractional timestamps. Full Xcode compilation and all Swift
+contract/model/operator/helper suites passed outside the worker sandbox.
+
+A stable-signed native workspace build replaced the same canonical app with a
+recoverable ZIP backup. The new greeting and compact Mochi rendered, and only
+one canonical process was observed. Expanded-page interaction verification did
+not complete: the computer-use connection closed during Settings inspection
+(`Sky Computer Use native pipe closed before response`) and reconnect/reset did
+not recover it; the app process itself remained running. Do not report this as
+a visual/interaction pass. The subsequent bounded-trace display correction
+(show every step, including the selected request) is source-verified but still
+needs deployment/relaunch with the final combined build.
+
+Still pending: full native workspace interaction checks, live integrated approval checks with an isolated held request,
 reboot recovery and the newer upstream session adapters. Task-to-session dynamic
 routing and routing controls are not implemented by this migration. Do not infer
 these gates from a build or fixtures. The existing single-chat Codex wake adapter

@@ -106,6 +106,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         islandController?.showWindow(nil)
         islandController?.fsm.launch()
         HookServer.shared.start()
+        #if !COUCOU_HUB
+        // The agent workspace has no n8n/Vercel/Resend/GitHub/Stripe/Cal.com/Notion
+        // surfaces, so their pollers (and network calls) do not start.
         N8nPoller.shared.start()
         VercelPoller.shared.start()
         ResendPoller.shared.start()
@@ -113,6 +116,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         StripePoller.shared.start()
         CalcomPoller.shared.start()
         NotionPoller.shared.start()
+        #endif
         NotificationCenter.default.addObserver(self, selector: #selector(openSettings),
                                                name: .openFullSettings, object: nil)
     }

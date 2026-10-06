@@ -41,13 +41,8 @@ struct IslandContainer: View {
     /// Pixels the content must be pushed down to clear the concave ear transparent area.
     /// = 0 in expanded mode (no ears), = earRadius in compact/notch mode.
     private var earOffset: CGFloat { max(0, -islandTopRadius) }
-    private var hubOwnsCompanion: Bool {
-        #if COUCOU_HUB
-        return state.view == .linkHub
-        #else
-        return false
-        #endif
-    }
+    /// Mochi stays on screen in the agent workspace; the host owns the companion.
+    private var hubOwnsCompanion: Bool { false }
 
     var body: some View {
         // Canvas active during drag-over (.upload), post-drop animation (.uploading),
@@ -444,7 +439,11 @@ struct IslandContentView: View {
                     // Views that fill available height instead of the fixed 98pt content frame:
                     // chat (prompt) is always flexible; mail is flexible only when active so
                     // it doesn't push the ZStack taller when inactive.
+                    #if COUCOU_HUB
+                    let isTall = v == .prompt || ((v == .mail || v == .linkHub) && active)
+                    #else
                     let isTall = v == .prompt || (v == .mail && active)
+                    #endif
                     let anim: Animation = active
                         ? .spring(response: 0.4, dampingFraction: 0.8).delay(0.16)
                         : .easeIn(duration: 0.16)
@@ -479,7 +478,24 @@ struct IslandHeader: View {
         HStack(spacing: 0) {
             // Left: tab capsules
             HStack(spacing: 5) {
+                #if COUCOU_HUB
+                TabButton(icon: "house.fill", view: .linkHub, state: state)
+                    .accessibilityLabel("Agent workspace")
+                    .accessibilityValue("\(hubModel.heldRequestCount) requests awaiting review")
+                    .overlay(alignment: .topTrailing) {
+                        if hubModel.heldRequestCount > 0 {
+                            Text(hubModel.heldRequestCount > 99 ? "99+" : String(hubModel.heldRequestCount))
+                                .font(.system(size: 9, weight: .bold))
+                                .foregroundStyle(.black)
+                                .padding(.horizontal, 3)
+                                .background(Color(hex: "#F5A524"), in: Capsule())
+                                .offset(x: 4, y: -3)
+                                .allowsHitTesting(false)
+                        }
+                    }
+                #else
                 TabButton(icon: "house.fill", view: .overview, state: state)
+                #endif
                 TabButton(icon: "bubble.left.fill", view: .prompt, state: state, preAction: {
                     #if !APPSTORE
                     if state.promptContext == nil {
@@ -495,6 +511,7 @@ struct IslandHeader: View {
 
             // Right: action icons
             HStack(spacing: 14) {
+                #if !COUCOU_HUB
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         state.view = .linkHub
@@ -507,19 +524,6 @@ struct IslandHeader: View {
                 .buttonStyle(.plain)
                 .help("Agent LinkHub")
                 .accessibilityLabel("Agent LinkHub")
-                #if COUCOU_HUB
-                .overlay(alignment: .topTrailing) {
-                    if hubModel.heldRequestCount > 0 {
-                        Text(hubModel.heldRequestCount > 99 ? "99+" : String(hubModel.heldRequestCount))
-                            .font(.system(size: 9, weight: .bold))
-                            .foregroundStyle(.black)
-                            .padding(.horizontal, 3)
-                            .background(Color(hex: "#F5A524"), in: Capsule())
-                            .offset(x: 8, y: -6)
-                            .allowsHitTesting(false)
-                    }
-                }
-                .accessibilityValue("\(hubModel.heldRequestCount) requests awaiting review")
                 #endif
 
                 Button(action: {
