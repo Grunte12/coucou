@@ -302,14 +302,14 @@ struct BotPlacement: View {
                     let uploadCx = 36 + CGFloat(t * (2 - t)) * 526
                     BotCanvasView(state: state, particleOverhang: 0)
                         .frame(width: canvasSize, height: canvasSize)
-                        .opacity(state.isDraggingBot ? 0 : opacity)
+                        .opacity(state.isDraggingBot || state.mochiOnDesktop ? 0 : opacity)
                         .position(x: uploadCx, y: cy)
                 }
                 .transition(.scale(scale: 0.01, anchor: .center).combined(with: .opacity))
             } else {
                 BotCanvasView(state: state, particleOverhang: overhang)
                     .frame(width: canvasSize, height: canvasSize + overhang)
-                    .opacity(state.isDraggingBot ? 0 : opacity)
+                    .opacity(state.isDraggingBot || state.mochiOnDesktop ? 0 : opacity)
                     .position(x: cx, y: cy - overhang / 2)
                     .animation(.spring(response: 0.5, dampingFraction: 0.72), value: cx)
                     .animation(.spring(response: 0.5, dampingFraction: 0.72), value: cy)
@@ -450,7 +450,7 @@ struct IslandContentView: View {
                     IslandViewContent(view: v, state: state)
                         .frame(maxWidth: .infinity)
                         .frame(height: isTall ? nil : 98)
-                        .frame(maxHeight: isTall ? .infinity : nil)
+                        .frame(minHeight: (isTall && !active) ? 0 : nil, maxHeight: isTall ? .infinity : nil)
                         .opacity(active ? 1 : 0)
                         .scaleEffect(active ? 1 : 0.97)
                         .allowsHitTesting(active)
@@ -509,40 +509,32 @@ struct IslandHeader: View {
 
             Spacer()
 
-            // Right: action icons
-            HStack(spacing: 14) {
-                #if !COUCOU_HUB
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        state.view = .linkHub
-                    }
-                }) {
-                    Image(systemName: state.view == .linkHub ? "server.rack.fill" : "server.rack")
-                        .font(.system(size: 14))
-                        .foregroundColor(state.view == .linkHub ? Color(hex: "#F5F6F8") : Color(hex: "#8E939C"))
+            // Right: plan pill (GitHub build, home view only) + action icons
+            HStack(spacing: 8) {
+                #if !APPSTORE
+                if state.view == .overview && state.showPlanInNotch && state.planRelayInstalled {
+                    ClaudePlanHeaderPill(state: state)
                 }
-                .buttonStyle(.plain)
-                .help("Agent LinkHub")
-                .accessibilityLabel("Agent LinkHub")
                 #endif
-
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        state.view = .settings
+                HStack(spacing: 14) {
+                    Button(action: {
+                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                            state.view = .settings
+                        }
+                    }) {
+                        Image(systemName: state.view == .settings ? "gearshape.fill" : "gearshape")
+                            .font(.system(size: 14))
+                            .foregroundColor(state.view == .settings ? Color(hex: "#F5F6F8") : Color(hex: "#8E939C"))
                     }
-                }) {
-                    Image(systemName: state.view == .settings ? "gearshape.fill" : "gearshape")
-                        .font(.system(size: 14))
-                        .foregroundColor(state.view == .settings ? Color(hex: "#F5F6F8") : Color(hex: "#8E939C"))
-                }
-                .buttonStyle(.plain)
+                    .buttonStyle(.plain)
 
-                Button(action: { state.soundEnabled.toggle() }) {
-                    Image(systemName: state.soundEnabled ? "speaker.wave.2" : "speaker.slash")
-                        .font(.system(size: 14))
-                        .foregroundColor(Color(hex: "#8E939C"))
+                    Button(action: { state.soundEnabled.toggle() }) {
+                        Image(systemName: state.soundEnabled ? "speaker.wave.2" : "speaker.slash")
+                            .font(.system(size: 14))
+                            .foregroundColor(Color(hex: "#8E939C"))
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             .padding(.trailing, 16)
         }
@@ -584,6 +576,64 @@ struct TabButton: View {
     }
 }
 
+// MARK: - Claude Plan header pill (GitHub build only)
+
+#if !APPSTORE
+struct ClaudePlanHeaderPill: View {
+    @ObservedObject var state: AppState
+    @State private var isHovered = false
+
+    private var effectiveColor: String {
+        ClaudePlanGauge.color(for: state.claudePlanUsage.flatMap { ClaudePlanGauge.dominantPct($0) })
+    }
+
+    private var label: String {
+        guard let usage = state.claudePlanUsage,
+              let pct = ClaudePlanGauge.dominantPct(usage) else { return "Claude —" }
+        return "Claude \(Int(pct.rounded()))%"
+    }
+
+    private var isActive: Bool { state.showingPlanDetail || isHovered }
+
+    var body: some View {
+        Button(action: {
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+                state.showingPlanDetail.toggle()
+            }
+        }) {
+            HStack(spacing: 4) {
+                Circle()
+                    .fill(Color(hex: effectiveColor))
+                    .frame(width: 6, height: 6)
+                Text(label)
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundColor(isActive
+                                     ? Color(hex: effectiveColor).lighter(by: 0.3)
+                                     : Color(hex: "#6B7079"))
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule()
+                    .fill(isActive
+                          ? Color(hex: effectiveColor).opacity(0.18)
+                          : Color(hex: "#0E0F11"))
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color(hex: effectiveColor).opacity(isActive ? 0.55 : 0.14), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+        .onHover { h in
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.7)) { isHovered = h }
+        }
+    }
+}
+#endif
+
 // MARK: - Compact mini mochi grid (2×2 to the right of the notch)
 
 struct CompactMiniGrid: View {
@@ -603,18 +653,5 @@ struct CompactMiniGrid: View {
             }
         }
         .frame(width: 28, height: 28)
-    }
-}
-
-// MARK: - Color helper
-
-extension Color {
-    init(hex: String) {
-        let h = hex.trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        let val = UInt64(h, radix: 16) ?? 0
-        let r = Double((val >> 16) & 0xFF) / 255
-        let g = Double((val >> 8)  & 0xFF) / 255
-        let b = Double( val        & 0xFF) / 255
-        self.init(red: r, green: g, blue: b)
     }
 }

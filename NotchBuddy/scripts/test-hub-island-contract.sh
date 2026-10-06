@@ -66,7 +66,7 @@ swiftc -sdk "$SDK_PATH" -target arm64-apple-macosx15.0 \
 swiftc -sdk "$SDK_PATH" -target arm64-apple-macosx15.0 \
   -swift-version 6 -strict-concurrency=complete \
   -module-cache-path "$MODULE_CACHE" \
-  "$PROJECT_DIR/Sources/App/IslandScreenGeometry.swift" \
+  "$PROJECT_DIR/Sources/CoucouKit/IslandScreenGeometry.swift" \
   "$PROJECT_DIR/tests/HubIslandGeometryTests.swift" \
   -o "$BUILD_DIR/HubIslandGeometryTests"
 "$BUILD_DIR/HubIslandGeometryTests"

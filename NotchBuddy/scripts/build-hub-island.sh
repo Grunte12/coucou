@@ -40,7 +40,7 @@ swiftc \
   -framework AppKit \
   -framework SwiftUI \
   -framework Security \
-  "$PROJECT_DIR/Sources/App/IslandScreenGeometry.swift" \
+  "$PROJECT_DIR/Sources/CoucouKit/IslandScreenGeometry.swift" \
   "$PROJECT_DIR/Sources/HubIsland/HubIslandClient.swift" \
   "$PROJECT_DIR/Sources/HubIsland/HubIslandModel.swift" \
   "$PROJECT_DIR/Sources/HubIsland/HubIslandApp.swift" \
