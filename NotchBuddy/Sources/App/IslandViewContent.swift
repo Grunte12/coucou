@@ -24,6 +24,12 @@ struct IslandViewContent: View {
         case .result:    ResultView(state: state)
         case .note:      NoteView(state: state)
         case .settings:  SettingsIslandView(state: state)
+        case .linkHub:
+            #if COUCOU_HUB
+            CoucouHubPane(state: state)
+            #else
+            LinkHubIslandView(state: state)
+            #endif
         case .greeting:  EmptyView()  // GreetingCanvasView overlaid in IslandRootView
         }
     }
@@ -2771,6 +2777,84 @@ struct SettingsIslandView: View {
             .padding(.leading, 84)
             .padding(.trailing, 16)
             .padding(.vertical, 14)
+        }
+    }
+}
+
+// MARK: - Agent LinkHub island pane
+
+struct LinkHubIslandView: View {
+    @ObservedObject var state: AppState
+    @StateObject private var health = LinkHubHealthMonitor()
+
+    private var statusLabel: String {
+        switch health.status {
+        case .notChecked: return "Not checked"
+        case .checking: return "Checking local Hub…"
+        case .authenticationRequired: return "Reachable · authentication required"
+        case .ready(let upstreamsVerified):
+            return upstreamsVerified ? "Service ready" : "Service ready · upstreams unverified"
+        case .httpError(let code): return "Hub replied HTTP \(code)"
+        case .unexpectedResponse: return "Unexpected health response"
+        case .unreachable: return "Not reachable"
+        }
+    }
+
+    private var statusColor: Color {
+        switch health.status {
+        case .authenticationRequired: return Color(hex: "#F5A524")
+        case .ready: return Color(hex: "#22C55E")
+        case .httpError, .unexpectedResponse, .unreachable: return Color(hex: "#F4505E")
+        case .notChecked, .checking: return Color(hex: "#8E939C")
+        }
+    }
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            CardBackground(wash: nil)
+            VStack(alignment: .leading, spacing: 7) {
+                HStack(spacing: 7) {
+                    Image(systemName: "server.rack")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(hex: "#8E939C"))
+                    Text("Agent LinkHub")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(Color(hex: "#F5F6F8"))
+                    Spacer(minLength: 8)
+                    Circle()
+                        .fill(statusColor)
+                        .frame(width: 6, height: 6)
+                    Text(statusLabel)
+                        .font(.system(size: 11.5))
+                        .foregroundColor(Color(hex: "#C5C8CD"))
+                        .lineLimit(1)
+                }
+
+                Text("127.0.0.1:8767/healthz · provider/upstream health is not verified")
+                    .font(.system(size: 10.5))
+                    .foregroundColor(Color(hex: "#8E939C"))
+                    .lineLimit(1)
+
+                HStack(spacing: 8) {
+                    Spacer()
+                    SecondaryButton(health.status == .checking ? "Checking…" : "Refresh") {
+                        Task { await health.refresh() }
+                    }
+                    .disabled(health.status == .checking)
+                    PrimaryButton("Open Console") {
+                        if let url = URL(string: "http://127.0.0.1:8768/") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+                }
+            }
+            .padding(.leading, 116)
+            .padding(.trailing, 16)
+            .padding(.vertical, 8)
+        }
+        .task(id: state.view) {
+            guard state.view == .linkHub else { return }
+            await health.refresh()
         }
     }
 }

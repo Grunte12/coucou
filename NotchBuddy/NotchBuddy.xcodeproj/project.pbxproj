@@ -7,65 +7,116 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		02563CF8806FAEDCB7E0A738 /* GithubPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB8B6E5E9DA6164F979E88F /* GithubPoller.swift */; };
 		0329E76BA4A8FEEA8A6D76E7 /* ClaudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83D5410BD030B243ADDCFF4 /* ClaudeService.swift */; };
 		065FCE817315454DE3F85F25 /* IslandViewContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA02B08886939FF6FE0475DD /* IslandViewContent.swift */; };
 		06BF5FD95E03010CAFDBF2D0 /* NotchBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BD8F3CAA60CF37640759E1 /* NotchBuddyApp.swift */; };
 		091EC3B2F1060D7EE1317E4E /* IslandWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D710BD7834228045869D0184 /* IslandWindowController.swift */; };
 		0A267EE2955C7AD8E02A296C /* N8nPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89DA1A0C21AE3535A1760BB /* N8nPoller.swift */; };
+		0A778C918DF38A5E28A07B91 /* CoucouHubIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D9EC9497C1783042A8E65DD /* CoucouHubIntegration.swift */; };
+		0BB064C3FA8659E44015BDF0 /* SafeWebURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FDED98F7F6C755A72C97A3 /* SafeWebURL.swift */; };
+		0CBAAE78BC7442C64ACC9B78 /* CoucouHubIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D9EC9497C1783042A8E65DD /* CoucouHubIntegration.swift */; };
 		0D68A4C4E3422487DB7B2262 /* IslandScreenGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BC1357785CA1B099A33969 /* IslandScreenGeometry.swift */; };
 		0E83C1DD4D20E7FB7A904450 /* VercelPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71718D1B87A39A4879DD2A9D /* VercelPoller.swift */; };
 		0E9CE475EC53C67DAB00F8E5 /* BotEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4540F630F8BA04AFFFA3979 /* BotEngine.swift */; };
+		1094E31E7AC981545381E1EE /* IslandScreenGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BC1357785CA1B099A33969 /* IslandScreenGeometry.swift */; };
+		11710A418EAFB1E03AE54F1A /* HubIslandModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C26286DAADAB16F6B57B12 /* HubIslandModel.swift */; };
 		118FC4AE0AC74D84B4A134D8 /* VercelPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71718D1B87A39A4879DD2A9D /* VercelPoller.swift */; };
+		13BA2FF09B4630C6AEC312AA /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A7D5CBE2AC084A10C5FF3 /* SettingsView.swift */; };
 		1558BB00C530B721172F6E65 /* StripePoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF78999D68D56ADE4CEFBE2 /* StripePoller.swift */; };
 		160EDB9D06275E2607DA5151 /* N8nPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89DA1A0C21AE3535A1760BB /* N8nPoller.swift */; };
+		17791C6220F6A5035909D131 /* HubIslandDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D088D34CE5720E9A8402B5 /* HubIslandDashboard.swift */; };
 		186AB8904029767DAA5277CF /* IslandScreenGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BC1357785CA1B099A33969 /* IslandScreenGeometry.swift */; };
+		18F4504697B89B9D501BF981 /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE21C2B315D37AA70ED45E9 /* SoundEngine.swift */; };
+		191B14BB398E726BB6BFCBC7 /* LinkHubHealth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F6D5708FC7AAAC9D97F40D /* LinkHubHealth.swift */; };
 		1969590AFEE6CB21404346F1 /* CalcomPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3104222B3F17BA5E8DEA5277 /* CalcomPoller.swift */; };
 		1F11EC4E6F604C612A1ADAD1 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E4F18AA940EFF7E047B9F7 /* AppState.swift */; };
 		2132477000FD77F7EB234DAA /* FileDropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3232F258523DD8D09B670363 /* FileDropView.swift */; };
 		2875610F701376BD65573386 /* WindowContextCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91B733ADC638E14E9BB6EFA /* WindowContextCapture.swift */; };
+		287BB1DA21B906F03C77A751 /* WindowContextCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91B733ADC638E14E9BB6EFA /* WindowContextCapture.swift */; };
 		2C798C3837A63B9BB561A1A0 /* HookServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79D8DD79C3DD9BBC584B3CB2 /* HookServer.swift */; };
 		2CC2E3B688B15BBEB3AE3BCE /* WindowContextCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = E91B733ADC638E14E9BB6EFA /* WindowContextCapture.swift */; };
 		2DEB459FBD0BA3CEAAA5FDE9 /* ClaudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83D5410BD030B243ADDCFF4 /* ClaudeService.swift */; };
+		2EBA59451D6BAB13E97FBF7B /* LinkHubHealth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F6D5708FC7AAAC9D97F40D /* LinkHubHealth.swift */; };
 		2F36E3C6C073E968A682AFA4 /* NotionPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE03E03D1804B0B92C5C2DAD /* NotionPoller.swift */; };
+		33FB8D348EB64EE83C294EBA /* HubIslandApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F73095318D1C04AA8999AC /* HubIslandApp.swift */; };
+		3622BABAD5C52A3CC00EEE07 /* BotEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4540F630F8BA04AFFFA3979 /* BotEngine.swift */; };
+		36F511C7FED99E7E7133C53D /* IslandRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A1A8206F73376F4CAF2057 /* IslandRootView.swift */; };
 		3756B7E1A55D9CEC8C4D34A4 /* IslandStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8212018F09EA1E96FBD63CD /* IslandStateMachine.swift */; };
+		3C59A3334F7D24438FD78168 /* LinkHubHealth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 65F6D5708FC7AAAC9D97F40D /* LinkHubHealth.swift */; };
+		3E02ADA5B1C514D5380E8554 /* HubIslandClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2BB846D7307FC75F1CAC2F8 /* HubIslandClient.swift */; };
 		3F19756A396F125EC711247F /* IslandTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3CE3617E9D336DDBA10F7A /* IslandTypes.swift */; };
 		4117E7C8AA231AAE36E7509D /* UploadCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B241B043223AFBBFB7418A5E /* UploadCanvasView.swift */; };
 		4B6AC00F22EC75E90E0157D5 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6D7015D6A77AA59323C0E7 /* AppLog.swift */; };
 		4F1E0B3C838DA3CD6F864BC0 /* CalcomPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3104222B3F17BA5E8DEA5277 /* CalcomPoller.swift */; };
 		56BE8C733F10A030A638FB60 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A7D5CBE2AC084A10C5FF3 /* SettingsView.swift */; };
+		578ABF4EC34FA21ED3641C08 /* CalcomPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3104222B3F17BA5E8DEA5277 /* CalcomPoller.swift */; };
 		5B9A00AFB0837731FA678E4E /* IslandStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8212018F09EA1E96FBD63CD /* IslandStateMachine.swift */; };
 		60E361FFE84C387E5E3ED1AA /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE21C2B315D37AA70ED45E9 /* SoundEngine.swift */; };
 		61CB7049490F61CFA1B36B64 /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6D7015D6A77AA59323C0E7 /* AppLog.swift */; };
 		61F73B27A7E3AFF584B2CC22 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E4F18AA940EFF7E047B9F7 /* AppState.swift */; };
 		62C4EE3F74DAA59764729E62 /* UploadCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B241B043223AFBBFB7418A5E /* UploadCanvasView.swift */; };
 		651FA3F09608DE5D02D61CCE /* BotCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29F4C0B02BE91654D02AA0C /* BotCanvasView.swift */; };
+		678B4FBD760C9B2A30573464 /* HubIslandClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2BB846D7307FC75F1CAC2F8 /* HubIslandClient.swift */; };
+		6898C4D95D1207358ACBCEA9 /* HubIslandSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A40565B0344FE09AF302174 /* HubIslandSound.swift */; };
 		68A950E3C23FD612639D9776 /* IslandViewContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA02B08886939FF6FE0475DD /* IslandViewContent.swift */; };
+		695604BED4CC5B811921CEAD /* ResendPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B5FDDE03F5F711146937E2 /* ResendPoller.swift */; };
+		6AA6FC6F29888341AEE736ED /* ClaudeService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A83D5410BD030B243ADDCFF4 /* ClaudeService.swift */; };
+		6E6207AEDCC01983B2341EC4 /* HubIslandShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE451A2EC11838AFDB95AA3 /* HubIslandShape.swift */; };
+		6FB177DD4B88FE5A5B5895B3 /* UploadSequenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD65943C32E150F1CD65C31 /* UploadSequenceEngine.swift */; };
 		6FC65C190ED614C664C9BC17 /* SafeWebURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FDED98F7F6C755A72C97A3 /* SafeWebURL.swift */; };
+		75F5B540AD9054E1BBC3DC6F /* UploadCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B241B043223AFBBFB7418A5E /* UploadCanvasView.swift */; };
 		78B3C6814431B2DD9D1F4949 /* SoundEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BE21C2B315D37AA70ED45E9 /* SoundEngine.swift */; };
+		78E92112E3D7AB7A070D93D2 /* NotionPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE03E03D1804B0B92C5C2DAD /* NotionPoller.swift */; };
 		78FCEDC8F78B683AB10E6529 /* NotionPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE03E03D1804B0B92C5C2DAD /* NotionPoller.swift */; };
+		7FDD262C1179DADDAE77F64D /* IslandTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3CE3617E9D336DDBA10F7A /* IslandTypes.swift */; };
 		878924960FC0F2B3524D48AC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192844E7299DEED5C2372067 /* AppDelegate.swift */; };
 		8C32A0C3EAF536D3836F61D5 /* GreetingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C581F7B1A9F14B281B60063E /* GreetingCanvasView.swift */; };
+		8C896C9BD4FAE89BA942561D /* HubIslandModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C26286DAADAB16F6B57B12 /* HubIslandModel.swift */; };
 		8D1C01F283FA7806119A1C85 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7C1A7D5CBE2AC084A10C5FF3 /* SettingsView.swift */; };
+		8E6B10452F437BF4F152C1A0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 506824380E9C80B9BC6DCE72 /* Assets.xcassets */; };
+		8F59D61E1C27EA2C1D01D458 /* VercelPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71718D1B87A39A4879DD2A9D /* VercelPoller.swift */; };
+		93BDB7108C19CAD6C6BD9B0D /* N8nPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B89DA1A0C21AE3535A1760BB /* N8nPoller.swift */; };
+		949355340ACE12013C648F63 /* BotCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29F4C0B02BE91654D02AA0C /* BotCanvasView.swift */; };
 		967B525F7D3837F31D740D18 /* ResendPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B5FDDE03F5F711146937E2 /* ResendPoller.swift */; };
+		9841B4BE790810C50D1D7B0B /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = C066E2B991AA4F56B2724263 /* sounds */; };
+		9CB8509F1C15F6C4830A65D7 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2E4F18AA940EFF7E047B9F7 /* AppState.swift */; };
 		9DD56C95ECABDDCE23652D50 /* HookServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79D8DD79C3DD9BBC584B3CB2 /* HookServer.swift */; };
+		9EE65A6121D8A12141C03EC5 /* IslandScreenGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78BC1357785CA1B099A33969 /* IslandScreenGeometry.swift */; };
+		A045C7BFA59458B29129C79A /* IslandStateMachine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8212018F09EA1E96FBD63CD /* IslandStateMachine.swift */; };
+		B11D7A39DABCD248F8BF8AB8 /* HubIslandSound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A40565B0344FE09AF302174 /* HubIslandSound.swift */; };
 		B3EC9CF3C8BD629C3530E8F1 /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = C066E2B991AA4F56B2724263 /* sounds */; };
+		B4F0D137B639C5824ED7924C /* HubIslandShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EE451A2EC11838AFDB95AA3 /* HubIslandShape.swift */; };
 		B605F976F4141435F27CF266 /* IslandRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A1A8206F73376F4CAF2057 /* IslandRootView.swift */; };
+		B84DC6CC1A994EBB745E4F0B /* CoucouHubIntegration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D9EC9497C1783042A8E65DD /* CoucouHubIntegration.swift */; };
+		BF30DADB3AB1CE0D165973CF /* AppLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6D7015D6A77AA59323C0E7 /* AppLog.swift */; };
 		C0E18D0F6F5F6D131E6066B8 /* GreetingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C581F7B1A9F14B281B60063E /* GreetingCanvasView.swift */; };
 		C18227D148D99FE6EE3CC51A /* GithubPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB8B6E5E9DA6164F979E88F /* GithubPoller.swift */; };
 		C24D863967D8D32D828ED4B1 /* BotEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4540F630F8BA04AFFFA3979 /* BotEngine.swift */; };
+		C5F359CA1F44B216FF764490 /* HookServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79D8DD79C3DD9BBC584B3CB2 /* HookServer.swift */; };
 		C61DDE2EC5FDDB39E4AA3B34 /* IslandWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D710BD7834228045869D0184 /* IslandWindowController.swift */; };
 		C808B654C84D9F71DBF8493A /* GithubPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB8B6E5E9DA6164F979E88F /* GithubPoller.swift */; };
 		C940B651C6CA952D99388E04 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192844E7299DEED5C2372067 /* AppDelegate.swift */; };
 		CA3321C14A11FED94E48B3E3 /* IslandRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15A1A8206F73376F4CAF2057 /* IslandRootView.swift */; };
+		CBFE21BA856D9C6941A6B91F /* GreetingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C581F7B1A9F14B281B60063E /* GreetingCanvasView.swift */; };
+		CCC6AFFFEBC8819C3EA4557B /* HubIslandWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A617CDBD6F605ED561C16E77 /* HubIslandWindowController.swift */; };
+		CD5B0CD9FDA54A5BEEAADDDD /* NotchBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BD8F3CAA60CF37640759E1 /* NotchBuddyApp.swift */; };
 		CD8DECA66B9E09C97E469DB9 /* BotCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29F4C0B02BE91654D02AA0C /* BotCanvasView.swift */; };
+		CEC0BCD442C578493893F2F5 /* StripePoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF78999D68D56ADE4CEFBE2 /* StripePoller.swift */; };
 		D82E93014C8087AE81511E40 /* IslandTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D3CE3617E9D336DDBA10F7A /* IslandTypes.swift */; };
+		D94BD0211522B59AF40011EA /* IslandWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D710BD7834228045869D0184 /* IslandWindowController.swift */; };
 		DCAC390FF9EC65B945A15B24 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 506824380E9C80B9BC6DCE72 /* Assets.xcassets */; };
 		DE05D09A32117582AC93A24A /* NotchBuddyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1BD8F3CAA60CF37640759E1 /* NotchBuddyApp.swift */; };
 		E4B9986674F4D425826F15A8 /* StripePoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2EF78999D68D56ADE4CEFBE2 /* StripePoller.swift */; };
+		E4C818D73023D0A1FA49C355 /* HubIslandDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5D088D34CE5720E9A8402B5 /* HubIslandDashboard.swift */; };
 		E776C7D1DE5C62EA8D4BA3E3 /* FileDropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3232F258523DD8D09B670363 /* FileDropView.swift */; };
 		EB23ED9F1C12EA8B54A76A91 /* ResendPoller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B5FDDE03F5F711146937E2 /* ResendPoller.swift */; };
 		ECECA2F225E82B7C951658D7 /* UploadSequenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD65943C32E150F1CD65C31 /* UploadSequenceEngine.swift */; };
+		ED756120D82690507C0F517E /* IslandViewContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA02B08886939FF6FE0475DD /* IslandViewContent.swift */; };
+		F05C0FA58ADD7296A604A980 /* FileDropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3232F258523DD8D09B670363 /* FileDropView.swift */; };
 		F06EE0A97CB77096A337AA8B /* sounds in Resources */ = {isa = PBXBuildFile; fileRef = C066E2B991AA4F56B2724263 /* sounds */; };
+		F306A02425E00828082FE36B /* HubIslandInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = F773972877CD0A23D0F917B3 /* HubIslandInstaller.swift */; };
+		F5A37CE8D9A3353B595BC13D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 192844E7299DEED5C2372067 /* AppDelegate.swift */; };
 		FAD78D74C6906D4EC8AA4101 /* UploadSequenceEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD65943C32E150F1CD65C31 /* UploadSequenceEngine.swift */; };
 		FBBC4CDE82B5886A83A27D7A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 506824380E9C80B9BC6DCE72 /* Assets.xcassets */; };
 		FEFEF1EBAB0E6CA74A33C10B /* SafeWebURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2FDED98F7F6C755A72C97A3 /* SafeWebURL.swift */; };
@@ -76,21 +127,31 @@
 		192844E7299DEED5C2372067 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1BE21C2B315D37AA70ED45E9 /* SoundEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEngine.swift; sourceTree = "<group>"; };
 		2EF78999D68D56ADE4CEFBE2 /* StripePoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StripePoller.swift; sourceTree = "<group>"; };
+		307324C7A4C76DBF893010C3 /* CoucouHub.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoucouHub.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3104222B3F17BA5E8DEA5277 /* CalcomPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalcomPoller.swift; sourceTree = "<group>"; };
 		3232F258523DD8D09B670363 /* FileDropView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileDropView.swift; sourceTree = "<group>"; };
+		35C26286DAADAB16F6B57B12 /* HubIslandModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandModel.swift; sourceTree = "<group>"; };
 		4DC2A07E42245A8CF3BBD2AB /* CoucouAppStore.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoucouAppStore.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506824380E9C80B9BC6DCE72 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5EE451A2EC11838AFDB95AA3 /* HubIslandShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandShape.swift; sourceTree = "<group>"; };
 		61B5FDDE03F5F711146937E2 /* ResendPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResendPoller.swift; sourceTree = "<group>"; };
+		65F6D5708FC7AAAC9D97F40D /* LinkHubHealth.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkHubHealth.swift; sourceTree = "<group>"; };
+		6AC44FBE7A101286F8456090 /* HubIsland.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HubIsland.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		6FD65943C32E150F1CD65C31 /* UploadSequenceEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadSequenceEngine.swift; sourceTree = "<group>"; };
 		71718D1B87A39A4879DD2A9D /* VercelPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VercelPoller.swift; sourceTree = "<group>"; };
 		78BC1357785CA1B099A33969 /* IslandScreenGeometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandScreenGeometry.swift; sourceTree = "<group>"; };
 		79D8DD79C3DD9BBC584B3CB2 /* HookServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HookServer.swift; sourceTree = "<group>"; };
 		7C1A7D5CBE2AC084A10C5FF3 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		7D9EC9497C1783042A8E65DD /* CoucouHubIntegration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoucouHubIntegration.swift; sourceTree = "<group>"; };
+		83F73095318D1C04AA8999AC /* HubIslandApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandApp.swift; sourceTree = "<group>"; };
 		8CB8B6E5E9DA6164F979E88F /* GithubPoller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GithubPoller.swift; sourceTree = "<group>"; };
 		8D3CE3617E9D336DDBA10F7A /* IslandTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandTypes.swift; sourceTree = "<group>"; };
+		9A40565B0344FE09AF302174 /* HubIslandSound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandSound.swift; sourceTree = "<group>"; };
 		9F6D7015D6A77AA59323C0E7 /* AppLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLog.swift; sourceTree = "<group>"; };
 		A14A61070D293AB4BBA303F7 /* NotchBuddy.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NotchBuddy.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A29F4C0B02BE91654D02AA0C /* BotCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotCanvasView.swift; sourceTree = "<group>"; };
+		A2BB846D7307FC75F1CAC2F8 /* HubIslandClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandClient.swift; sourceTree = "<group>"; };
+		A617CDBD6F605ED561C16E77 /* HubIslandWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandWindowController.swift; sourceTree = "<group>"; };
 		A83D5410BD030B243ADDCFF4 /* ClaudeService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClaudeService.swift; sourceTree = "<group>"; };
 		B241B043223AFBBFB7418A5E /* UploadCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadCanvasView.swift; sourceTree = "<group>"; };
 		B2FDED98F7F6C755A72C97A3 /* SafeWebURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafeWebURL.swift; sourceTree = "<group>"; };
@@ -102,12 +163,30 @@
 		D4540F630F8BA04AFFFA3979 /* BotEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BotEngine.swift; sourceTree = "<group>"; };
 		D710BD7834228045869D0184 /* IslandWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandWindowController.swift; sourceTree = "<group>"; };
 		D8212018F09EA1E96FBD63CD /* IslandStateMachine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandStateMachine.swift; sourceTree = "<group>"; };
+		E5D088D34CE5720E9A8402B5 /* HubIslandDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandDashboard.swift; sourceTree = "<group>"; };
 		E91B733ADC638E14E9BB6EFA /* WindowContextCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WindowContextCapture.swift; sourceTree = "<group>"; };
 		F1BD8F3CAA60CF37640759E1 /* NotchBuddyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotchBuddyApp.swift; sourceTree = "<group>"; };
+		F773972877CD0A23D0F917B3 /* HubIslandInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HubIslandInstaller.swift; sourceTree = "<group>"; };
 		FA02B08886939FF6FE0475DD /* IslandViewContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IslandViewContent.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
+		203E07503D23587F54C18DFC /* HubIsland */ = {
+			isa = PBXGroup;
+			children = (
+				83F73095318D1C04AA8999AC /* HubIslandApp.swift */,
+				A2BB846D7307FC75F1CAC2F8 /* HubIslandClient.swift */,
+				E5D088D34CE5720E9A8402B5 /* HubIslandDashboard.swift */,
+				F773972877CD0A23D0F917B3 /* HubIslandInstaller.swift */,
+				35C26286DAADAB16F6B57B12 /* HubIslandModel.swift */,
+				5EE451A2EC11838AFDB95AA3 /* HubIslandShape.swift */,
+				9A40565B0344FE09AF302174 /* HubIslandSound.swift */,
+				A617CDBD6F605ED561C16E77 /* HubIslandWindowController.swift */,
+				44FB519115593CA5321FBBCF /* .claude */,
+			);
+			path = HubIsland;
+			sourceTree = "<group>";
+		};
 		2D4550630644796DA0649B81 /* App */ = {
 			isa = PBXGroup;
 			children = (
@@ -118,6 +197,7 @@
 				D4540F630F8BA04AFFFA3979 /* BotEngine.swift */,
 				3104222B3F17BA5E8DEA5277 /* CalcomPoller.swift */,
 				A83D5410BD030B243ADDCFF4 /* ClaudeService.swift */,
+				7D9EC9497C1783042A8E65DD /* CoucouHubIntegration.swift */,
 				3232F258523DD8D09B670363 /* FileDropView.swift */,
 				8CB8B6E5E9DA6164F979E88F /* GithubPoller.swift */,
 				C581F7B1A9F14B281B60063E /* GreetingCanvasView.swift */,
@@ -128,6 +208,7 @@
 				8D3CE3617E9D336DDBA10F7A /* IslandTypes.swift */,
 				FA02B08886939FF6FE0475DD /* IslandViewContent.swift */,
 				D710BD7834228045869D0184 /* IslandWindowController.swift */,
+				65F6D5708FC7AAAC9D97F40D /* LinkHubHealth.swift */,
 				B89DA1A0C21AE3535A1760BB /* N8nPoller.swift */,
 				F1BD8F3CAA60CF37640759E1 /* NotchBuddyApp.swift */,
 				BE03E03D1804B0B92C5C2DAD /* NotionPoller.swift */,
@@ -144,10 +225,19 @@
 			path = App;
 			sourceTree = "<group>";
 		};
+		44FB519115593CA5321FBBCF /* .claude */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = .claude;
+			sourceTree = "<group>";
+		};
 		6CF11AAA7898712CF6DB364A /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				4DC2A07E42245A8CF3BBD2AB /* CoucouAppStore.app */,
+				307324C7A4C76DBF893010C3 /* CoucouHub.app */,
+				6AC44FBE7A101286F8456090 /* HubIsland.app */,
 				A14A61070D293AB4BBA303F7 /* NotchBuddy.app */,
 			);
 			name = Products;
@@ -157,6 +247,7 @@
 			isa = PBXGroup;
 			children = (
 				2D4550630644796DA0649B81 /* App */,
+				203E07503D23587F54C18DFC /* HubIsland */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -200,6 +291,24 @@
 			productReference = A14A61070D293AB4BBA303F7 /* NotchBuddy.app */;
 			productType = "com.apple.product-type.application";
 		};
+		2879BEB704E22F993CB4D92D /* CoucouHub */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 2FFD89B5CBD194E01060394C /* Build configuration list for PBXNativeTarget "CoucouHub" */;
+			buildPhases = (
+				8665CED50602ACCB9341DDD6 /* Sources */,
+				C2DA55298DCD561756EF17FC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CoucouHub;
+			packageProductDependencies = (
+			);
+			productName = CoucouHub;
+			productReference = 307324C7A4C76DBF893010C3 /* CoucouHub.app */;
+			productType = "com.apple.product-type.application";
+		};
 		495922874E20462B9FC47E53 /* CoucouAppStore */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 21BF9C617EC84EECBB6BC46D /* Build configuration list for PBXNativeTarget "CoucouAppStore" */;
@@ -218,6 +327,23 @@
 			productReference = 4DC2A07E42245A8CF3BBD2AB /* CoucouAppStore.app */;
 			productType = "com.apple.product-type.application";
 		};
+		F5EA6C4E9E90776AF6875E23 /* HubIsland */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3A341C8D3C832E795DFD838C /* Build configuration list for PBXNativeTarget "HubIsland" */;
+			buildPhases = (
+				1750E33DEA86774DE493F1C7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HubIsland;
+			packageProductDependencies = (
+			);
+			productName = HubIsland;
+			productReference = 6AC44FBE7A101286F8456090 /* HubIsland.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -230,9 +356,17 @@
 					12E59C1D41BFA3D2F7CDD7F5 = {
 						ProvisioningStyle = Manual;
 					};
+					2879BEB704E22F993CB4D92D = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
 					495922874E20462B9FC47E53 = {
 						DevelopmentTeam = 256AUJ9555;
 						ProvisioningStyle = Automatic;
+					};
+					F5EA6C4E9E90776AF6875E23 = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
 					};
 				};
 			};
@@ -250,8 +384,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				2879BEB704E22F993CB4D92D /* CoucouHub */,
 				12E59C1D41BFA3D2F7CDD7F5 /* NotchBuddy */,
 				495922874E20462B9FC47E53 /* CoucouAppStore */,
+				F5EA6C4E9E90776AF6875E23 /* HubIsland */,
 			);
 		};
 /* End PBXProject section */
@@ -275,6 +411,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		C2DA55298DCD561756EF17FC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8E6B10452F437BF4F152C1A0 /* Assets.xcassets in Resources */,
+				9841B4BE790810C50D1D7B0B /* sounds in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -289,6 +434,7 @@
 				C24D863967D8D32D828ED4B1 /* BotEngine.swift in Sources */,
 				4F1E0B3C838DA3CD6F864BC0 /* CalcomPoller.swift in Sources */,
 				2DEB459FBD0BA3CEAAA5FDE9 /* ClaudeService.swift in Sources */,
+				B84DC6CC1A994EBB745E4F0B /* CoucouHubIntegration.swift in Sources */,
 				E776C7D1DE5C62EA8D4BA3E3 /* FileDropView.swift in Sources */,
 				C808B654C84D9F71DBF8493A /* GithubPoller.swift in Sources */,
 				8C32A0C3EAF536D3836F61D5 /* GreetingCanvasView.swift in Sources */,
@@ -299,6 +445,7 @@
 				3F19756A396F125EC711247F /* IslandTypes.swift in Sources */,
 				065FCE817315454DE3F85F25 /* IslandViewContent.swift in Sources */,
 				091EC3B2F1060D7EE1317E4E /* IslandWindowController.swift in Sources */,
+				191B14BB398E726BB6BFCBC7 /* LinkHubHealth.swift in Sources */,
 				0A267EE2955C7AD8E02A296C /* N8nPoller.swift in Sources */,
 				06BF5FD95E03010CAFDBF2D0 /* NotchBuddyApp.swift in Sources */,
 				2F36E3C6C073E968A682AFA4 /* NotionPoller.swift in Sources */,
@@ -314,6 +461,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		1750E33DEA86774DE493F1C7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				33FB8D348EB64EE83C294EBA /* HubIslandApp.swift in Sources */,
+				678B4FBD760C9B2A30573464 /* HubIslandClient.swift in Sources */,
+				17791C6220F6A5035909D131 /* HubIslandDashboard.swift in Sources */,
+				F306A02425E00828082FE36B /* HubIslandInstaller.swift in Sources */,
+				8C896C9BD4FAE89BA942561D /* HubIslandModel.swift in Sources */,
+				B4F0D137B639C5824ED7924C /* HubIslandShape.swift in Sources */,
+				6898C4D95D1207358ACBCEA9 /* HubIslandSound.swift in Sources */,
+				CCC6AFFFEBC8819C3EA4557B /* HubIslandWindowController.swift in Sources */,
+				9EE65A6121D8A12141C03EC5 /* IslandScreenGeometry.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		760473CA0E9C38B61B761B8C /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -325,6 +488,7 @@
 				0E9CE475EC53C67DAB00F8E5 /* BotEngine.swift in Sources */,
 				1969590AFEE6CB21404346F1 /* CalcomPoller.swift in Sources */,
 				0329E76BA4A8FEEA8A6D76E7 /* ClaudeService.swift in Sources */,
+				0CBAAE78BC7442C64ACC9B78 /* CoucouHubIntegration.swift in Sources */,
 				2132477000FD77F7EB234DAA /* FileDropView.swift in Sources */,
 				C18227D148D99FE6EE3CC51A /* GithubPoller.swift in Sources */,
 				C0E18D0F6F5F6D131E6066B8 /* GreetingCanvasView.swift in Sources */,
@@ -335,6 +499,7 @@
 				D82E93014C8087AE81511E40 /* IslandTypes.swift in Sources */,
 				68A950E3C23FD612639D9776 /* IslandViewContent.swift in Sources */,
 				C61DDE2EC5FDDB39E4AA3B34 /* IslandWindowController.swift in Sources */,
+				2EBA59451D6BAB13E97FBF7B /* LinkHubHealth.swift in Sources */,
 				160EDB9D06275E2607DA5151 /* N8nPoller.swift in Sources */,
 				DE05D09A32117582AC93A24A /* NotchBuddyApp.swift in Sources */,
 				78FCEDC8F78B683AB10E6529 /* NotionPoller.swift in Sources */,
@@ -347,6 +512,49 @@
 				ECECA2F225E82B7C951658D7 /* UploadSequenceEngine.swift in Sources */,
 				0E83C1DD4D20E7FB7A904450 /* VercelPoller.swift in Sources */,
 				2CC2E3B688B15BBEB3AE3BCE /* WindowContextCapture.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8665CED50602ACCB9341DDD6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5A37CE8D9A3353B595BC13D /* AppDelegate.swift in Sources */,
+				BF30DADB3AB1CE0D165973CF /* AppLog.swift in Sources */,
+				9CB8509F1C15F6C4830A65D7 /* AppState.swift in Sources */,
+				949355340ACE12013C648F63 /* BotCanvasView.swift in Sources */,
+				3622BABAD5C52A3CC00EEE07 /* BotEngine.swift in Sources */,
+				578ABF4EC34FA21ED3641C08 /* CalcomPoller.swift in Sources */,
+				6AA6FC6F29888341AEE736ED /* ClaudeService.swift in Sources */,
+				0A778C918DF38A5E28A07B91 /* CoucouHubIntegration.swift in Sources */,
+				F05C0FA58ADD7296A604A980 /* FileDropView.swift in Sources */,
+				02563CF8806FAEDCB7E0A738 /* GithubPoller.swift in Sources */,
+				CBFE21BA856D9C6941A6B91F /* GreetingCanvasView.swift in Sources */,
+				C5F359CA1F44B216FF764490 /* HookServer.swift in Sources */,
+				3E02ADA5B1C514D5380E8554 /* HubIslandClient.swift in Sources */,
+				E4C818D73023D0A1FA49C355 /* HubIslandDashboard.swift in Sources */,
+				11710A418EAFB1E03AE54F1A /* HubIslandModel.swift in Sources */,
+				6E6207AEDCC01983B2341EC4 /* HubIslandShape.swift in Sources */,
+				B11D7A39DABCD248F8BF8AB8 /* HubIslandSound.swift in Sources */,
+				36F511C7FED99E7E7133C53D /* IslandRootView.swift in Sources */,
+				1094E31E7AC981545381E1EE /* IslandScreenGeometry.swift in Sources */,
+				A045C7BFA59458B29129C79A /* IslandStateMachine.swift in Sources */,
+				7FDD262C1179DADDAE77F64D /* IslandTypes.swift in Sources */,
+				ED756120D82690507C0F517E /* IslandViewContent.swift in Sources */,
+				D94BD0211522B59AF40011EA /* IslandWindowController.swift in Sources */,
+				3C59A3334F7D24438FD78168 /* LinkHubHealth.swift in Sources */,
+				93BDB7108C19CAD6C6BD9B0D /* N8nPoller.swift in Sources */,
+				CD5B0CD9FDA54A5BEEAADDDD /* NotchBuddyApp.swift in Sources */,
+				78E92112E3D7AB7A070D93D2 /* NotionPoller.swift in Sources */,
+				695604BED4CC5B811921CEAD /* ResendPoller.swift in Sources */,
+				0BB064C3FA8659E44015BDF0 /* SafeWebURL.swift in Sources */,
+				13BA2FF09B4630C6AEC312AA /* SettingsView.swift in Sources */,
+				18F4504697B89B9D501BF981 /* SoundEngine.swift in Sources */,
+				CEC0BCD442C578493893F2F5 /* StripePoller.swift in Sources */,
+				75F5B540AD9054E1BBC3DC6F /* UploadCanvasView.swift in Sources */,
+				6FB177DD4B88FE5A5B5895B3 /* UploadSequenceEngine.swift in Sources */,
+				8F59D61E1C27EA2C1D01D458 /* VercelPoller.swift in Sources */,
+				287BB1DA21B906F03C77A751 /* WindowContextCapture.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +576,34 @@
 				PRODUCT_BUNDLE_IDENTIFIER = fr.louisraille.NotchBuddy;
 				PRODUCT_NAME = Coucou;
 				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4E9744BB519C1C0FC75E3D69 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_SANDBOX = NO;
+				INFOPLIST_FILE = "Resources/HubIsland-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				OTHER_SWIFT_FLAGS = "-strict-concurrency=complete";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubisland.desktop;
+				PRODUCT_NAME = HubIsland;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = HUB_ISLAND;
+				SWIFT_VERSION = 6.0;
 			};
 			name = Release;
 		};
@@ -409,6 +645,76 @@
 				PRODUCT_NAME = Coucou;
 				SDKROOT = macosx;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPSTORE;
+			};
+			name = Release;
+		};
+		8A569C9EFF36DDC179F70A0D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Resources/CoucouHub-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubisland.desktop;
+				PRODUCT_NAME = HubIsland;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = COUCOU_HUB;
+			};
+			name = Debug;
+		};
+		8FF3C4FEECE48341B5468E33 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_SANDBOX = NO;
+				INFOPLIST_FILE = "Resources/HubIsland-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				OTHER_SWIFT_FLAGS = "-strict-concurrency=complete";
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubisland.desktop;
+				PRODUCT_NAME = HubIsland;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = HUB_ISLAND;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		9558BC7C54EDBAC3DF5CBBB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGNING_ALLOWED = NO;
+				CODE_SIGNING_REQUIRED = NO;
+				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_IDENTITY = "";
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				INFOPLIST_FILE = "Resources/CoucouHub-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.hubisland.desktop;
+				PRODUCT_NAME = HubIsland;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = COUCOU_HUB;
 			};
 			name = Release;
 		};
@@ -585,6 +891,24 @@
 			buildConfigurations = (
 				CA9D2D4E8E2B8015D8EA90A2 /* Debug */,
 				ECAB43E9AE0B6830F8D4C6BA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		2FFD89B5CBD194E01060394C /* Build configuration list for PBXNativeTarget "CoucouHub" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A569C9EFF36DDC179F70A0D /* Debug */,
+				9558BC7C54EDBAC3DF5CBBB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		3A341C8D3C832E795DFD838C /* Build configuration list for PBXNativeTarget "HubIsland" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8FF3C4FEECE48341B5468E33 /* Debug */,
+				4E9744BB519C1C0FC75E3D69 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

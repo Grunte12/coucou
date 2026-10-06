@@ -42,13 +42,77 @@ schemes:
     archive:
       config: Release
 
+  HubIsland:
+    build:
+      targets:
+        HubIsland: all
+    run:
+      config: Debug
+
+  CoucouHub:
+    build:
+      targets:
+        CoucouHub: all
+    run:
+      config: Debug
+
 targets:
+  # Migration target: the real Coucou app/shell plus our existing Hub model.
+  # Same installed identity is intentional. Do not install alongside HubIsland.
+  CoucouHub:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources
+        excludes:
+          - "HubIsland/**"
+      - path: Sources/HubIsland
+        excludes:
+          - "HubIslandApp.swift"
+          - "HubIslandWindowController.swift"
+          - "HubIslandInstaller.swift"
+      - path: Assets.xcassets
+        buildPhase: resources
+      - path: Resources/sounds
+        type: folder
+        buildPhase: resources
+    info:
+      path: Resources/CoucouHub-Info.plist
+      properties:
+        CFBundleName: Hub Notch
+        CFBundleDisplayName: Hub Notch
+        CFBundleIdentifier: com.hubisland.desktop
+        CFBundleVersion: "2"
+        CFBundleShortVersionString: "1.1"
+        LSUIElement: YES
+        NSHighResolutionCapable: YES
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: YES
+    settings:
+      base:
+        PRODUCT_NAME: HubIsland
+        PRODUCT_BUNDLE_IDENTIFIER: com.hubisland.desktop
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: COUCOU_HUB
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_ENTITLEMENTS: ""
+      configs:
+        Release:
+          CODE_SIGNING_ALLOWED: NO
+          CODE_SIGNING_REQUIRED: NO
+          CODE_SIGN_IDENTITY: ""
+          DEVELOPMENT_TEAM: ""
+          CODE_SIGN_ENTITLEMENTS: ""
+
   NotchBuddy:
     type: application
     platform: macOS
     sources:
       - path: Sources
         type: group
+        excludes:
+          - "HubIsland/**"
       - path: Assets.xcassets
         buildPhase: resources
       - path: Resources/sounds
@@ -83,6 +147,8 @@ targets:
     sources:
       - path: Sources
         type: group
+        excludes:
+          - "HubIsland/**"
       - path: Assets.xcassets
         buildPhase: resources
       - path: Resources/sounds
@@ -115,3 +181,52 @@ targets:
         DEVELOPMENT_TEAM: 256AUJ9555
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: APPSTORE
         CODE_SIGNING_ALLOWED: YES
+
+  HubIsland:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/HubIsland
+        type: group
+      - path: Sources/App/IslandScreenGeometry.swift
+    info:
+      path: Resources/HubIsland-Info.plist
+      properties:
+        CFBundleName: Hub Island
+        CFBundleDisplayName: Hub Island
+        CFBundleIdentifier: com.hubisland.desktop
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0"
+        CFBundlePackageType: APPL
+        LSUIElement: YES
+        NSHighResolutionCapable: YES
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: YES
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.hubisland.desktop
+        PRODUCT_NAME: HubIsland
+        INFOPLIST_FILE: Resources/HubIsland-Info.plist
+        MACOSX_DEPLOYMENT_TARGET: "15.0"
+        SWIFT_VERSION: "6.0"
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: HUB_ISLAND
+        OTHER_SWIFT_FLAGS: "-strict-concurrency=complete"
+        ENABLE_HARDENED_RUNTIME: YES
+        ENABLE_SANDBOX: NO
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGN_ENTITLEMENTS: ""
+        DEVELOPMENT_TEAM: ""
+      configs:
+        Debug:
+          CODE_SIGNING_REQUIRED: NO
+          CODE_SIGNING_ALLOWED: NO
+          DEVELOPMENT_TEAM: ""
+          CODE_SIGN_ENTITLEMENTS: ""
+        Release:
+          CODE_SIGNING_REQUIRED: NO
+          CODE_SIGNING_ALLOWED: NO
+          CODE_SIGN_IDENTITY: ""
+          DEVELOPMENT_TEAM: ""
+          CODE_SIGN_ENTITLEMENTS: ""

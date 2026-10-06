@@ -14,6 +14,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.setActivationPolicy(.accessory)
         setupMenuBarItem()
         setupIsland()
+        #if COUCOU_HUB
+        CoucouHubIntegration.shared.start()
+        #endif
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        #if COUCOU_HUB
+        CoucouHubIntegration.shared.stop()
+        #endif
     }
 
     // MARK: - Menu bar

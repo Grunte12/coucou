@@ -10,6 +10,10 @@ struct IslandScreenGeometry {
     let width: CGFloat
     let height: CGFloat
 
+    /// Resting overlays must never extend into usable menu-bar space.
+    var restingOverlayWidth: CGFloat { hasNotch ? width : 0 }
+    var restingOverlayHeight: CGFloat { hasNotch ? height : 0 }
+
     init(screenWidth: CGFloat, safeAreaTop: CGFloat,
          auxiliaryLeftWidth: CGFloat?, auxiliaryRightWidth: CGFloat?,
          menuBarHeight: CGFloat) {

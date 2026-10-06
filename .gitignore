@@ -18,3 +18,11 @@ DerivedData/
 # Local only (never published)
 .claude/
 _prive/
+
+# Private integration evidence and local machine setup (not source artifacts)
+outputs/
+research/
+IMPLEMENTATION_PLAN.md
+DESIGN_HANDOFF.md
+scripts/archive-duplicate-apps.sh
+scripts/sign-local-app.sh

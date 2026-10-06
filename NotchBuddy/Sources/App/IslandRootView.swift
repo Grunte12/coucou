@@ -41,6 +41,13 @@ struct IslandContainer: View {
     /// Pixels the content must be pushed down to clear the concave ear transparent area.
     /// = 0 in expanded mode (no ears), = earRadius in compact/notch mode.
     private var earOffset: CGFloat { max(0, -islandTopRadius) }
+    private var hubOwnsCompanion: Bool {
+        #if COUCOU_HUB
+        return state.view == .linkHub
+        #else
+        return false
+        #endif
+    }
 
     var body: some View {
         // Canvas active during drag-over (.upload), post-drop animation (.uploading),
@@ -101,7 +108,7 @@ struct IslandContainer: View {
                     Rectangle().frame(width: islandWidth,
                                       height: state.mode == .expanded ? 320 : islandHeight)
                 }
-                .opacity(uploadActive || greetingActive ? 0 : 1)
+                .opacity(uploadActive || greetingActive || hubOwnsCompanion ? 0 : 1)
                 .animation(.easeInOut(duration: 0.25), value: uploadActive || greetingActive)
 
             CountdownBar(state: state, islandW: islandWidth)
@@ -464,6 +471,9 @@ struct IslandContentView: View {
 
 struct IslandHeader: View {
     @ObservedObject var state: AppState
+    #if COUCOU_HUB
+    @ObservedObject private var hubModel = CoucouHubIntegration.shared.model
+    #endif
 
     var body: some View {
         HStack(spacing: 0) {
@@ -485,6 +495,33 @@ struct IslandHeader: View {
 
             // Right: action icons
             HStack(spacing: 14) {
+                Button(action: {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        state.view = .linkHub
+                    }
+                }) {
+                    Image(systemName: state.view == .linkHub ? "server.rack.fill" : "server.rack")
+                        .font(.system(size: 14))
+                        .foregroundColor(state.view == .linkHub ? Color(hex: "#F5F6F8") : Color(hex: "#8E939C"))
+                }
+                .buttonStyle(.plain)
+                .help("Agent LinkHub")
+                .accessibilityLabel("Agent LinkHub")
+                #if COUCOU_HUB
+                .overlay(alignment: .topTrailing) {
+                    if hubModel.heldRequestCount > 0 {
+                        Text(hubModel.heldRequestCount > 99 ? "99+" : String(hubModel.heldRequestCount))
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundStyle(.black)
+                            .padding(.horizontal, 3)
+                            .background(Color(hex: "#F5A524"), in: Capsule())
+                            .offset(x: 8, y: -6)
+                            .allowsHitTesting(false)
+                    }
+                }
+                .accessibilityValue("\(hubModel.heldRequestCount) requests awaiting review")
+                #endif
+
                 Button(action: {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                         state.view = .settings
