@@ -16,6 +16,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         setupIsland()
         #if COUCOU_HUB
         CoucouHubIntegration.shared.start()
+        NotificationCenter.default.addObserver(self, selector: #selector(collapseHubPane),
+                                               name: .coucouHubCollapse, object: nil)
         #endif
     }
 
@@ -24,6 +26,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         CoucouHubIntegration.shared.stop()
         #endif
     }
+
+    #if COUCOU_HUB
+    @objc private func collapseHubPane() {
+        islandController?.collapse()
+    }
+    #endif
 
     // MARK: - Menu bar
 

@@ -34,6 +34,8 @@ final class HubIslandModel: ObservableObject {
     @Published private(set) var credentialAvailable: Bool?
     @Published private(set) var tincanAccess: HubIslandTincanAccess = .notChecked
     @Published private(set) var tincanInbox: HubTincanInbox?
+    @Published private(set) var tincanRoster: HubTincanRoster?
+    private var rosterLastAttempt: Date?
     @Published private(set) var tincanErrorMessage: String?
     @Published private(set) var isRefreshingTincan = false
     @Published private(set) var selectedTincanTask: HubTincanTraceSummary?
@@ -358,6 +360,8 @@ final class HubIslandModel: ObservableObject {
                 guard !Task.isCancelled else { return false }
                 tincanAccess = .needsCredential
                 tincanInbox = nil
+                tincanRoster = nil
+                rosterLastAttempt = nil
                 tincanErrorMessage = nil
                 return false
             }
@@ -381,19 +385,44 @@ final class HubIslandModel: ObservableObject {
                let latest = currentTincanTask(requestID: selectedTincanTask.requestID) {
                 self.selectedTincanTask = latest
             }
+            if loaded.status == .ready && loaded.enabled {
+                await refreshTincanRosterIfDue(credential: credential)
+            } else {
+                tincanRoster = nil
+            }
             return true
         } catch is CancellationError {
             return false
         } catch let error as HubIslandAPIError {
             guard !Task.isCancelled else { return false }
+            tincanRoster = nil
             showTincan(error)
             return false
         } catch {
             guard !Task.isCancelled else { return false }
             tincanAccess = .error
             tincanInbox = nil
+            tincanRoster = nil
             tincanErrorMessage = "Could not read Tincan task metadata from the local Hub."
             return false
+        }
+    }
+
+    /// Piggybacks on the existing poller; no extra timer, LLM, or inbox consumer.
+    private func refreshTincanRosterIfDue(credential: String) async {
+        let now = Date()
+        guard rosterLastAttempt.map({ now.timeIntervalSince($0) >= 30 }) ?? true else { return }
+        rosterLastAttempt = now
+        do {
+            let loaded = try await api.tincanRoster(credential: credential)
+            try Task.checkCancellation()
+            tincanRoster = loaded
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled else { return }
+            // Presence failure must not disable independent task/approval reads.
+            tincanRoster = nil
         }
     }
 

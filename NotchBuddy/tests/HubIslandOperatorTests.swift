@@ -10,6 +10,8 @@ actor OperatorFixtureAPI: HubIslandAPI {
     private var delayInboxReads = false
     private var inbox: HubTincanInbox
     private var inboxReadCount = 0
+    private var rosterReadCount = 0
+    private var rosterFails = false
     private var traceReadCount = 0
     private var decisionCallCount = 0
     private var decisionRequests: [(String, HubTincanDecision)] = []
@@ -33,6 +35,8 @@ actor OperatorFixtureAPI: HubIslandAPI {
 
     func setInbox(_ value: HubTincanInbox) { inbox = value }
     func setInboxMode(_ value: InboxMode) { inboxMode = value }
+    func setRosterFails(_ value: Bool) { rosterFails = value }
+    func rosterReads() -> Int { rosterReadCount }
     func setInboxModeAfterDecision(_ value: InboxMode?) { inboxModeAfterDecision = value }
     func setDecisionError(_ value: HubIslandAPIError?) { decisionError = value }
     func setDelayTraceReads(_ value: Bool) { delayTraceReads = value }
@@ -57,6 +61,15 @@ actor OperatorFixtureAPI: HubIslandAPI {
         case .permissionRequired: throw HubIslandAPIError.operatorPermissionRequired
         case .offline: throw HubIslandAPIError.unreachable
         }
+    }
+
+    func tincanRoster(credential: String) async throws -> HubTincanRoster {
+        rosterReadCount += 1
+        if rosterFails { throw HubIslandAPIError.unreachable }
+        return HubTincanRoster(status: .ready, enabled: true, agents: [
+            HubTincanAgent(id: "muse", name: "muse", online: true, kind: nil,
+                          wake: "wait", version: nil, lastActive: nil, queued: 0, claimed: 0)
+        ])
     }
 
     func tincanTrace(credential: String, traceID: String) async throws -> HubTincanTrace {
@@ -111,6 +124,7 @@ enum HubIslandOperatorTests {
 
     @MainActor
     static func main() async throws {
+        try await testRosterCadenceAndFailureIsolation()
         try await testMetadataAndExactApproval()
         try await testStaleDecisionIsNeverRetried()
         try await testAcknowledgementNeedsFreshState()
@@ -119,6 +133,33 @@ enum HubIslandOperatorTests {
         try await testExplicitDetailRefresh()
         try await testDenialAndUncertainDecision()
         print("Hub Island operator: metadata polling/recovery/restart, held-ID dedupe, explicit detail refresh, hidden-refresh cancellation, exact approval/denial, uncertain no-replay, stale blocking and permission passed")
+    }
+
+    @MainActor
+    private static func testRosterCadenceAndFailureIsolation() async throws {
+        for failing in [false, true] {
+            let api = OperatorFixtureAPI()
+            await api.setRosterFails(failing)
+            let model = HubIslandModel(api: api, loadCredential: { "fixture-scoped-credential" })
+            model.refreshOperatorTasks()
+            try await wait(until: { model.tincanAccess == .ready && !model.isRefreshingTincan },
+                           message: "Roster baseline did not settle")
+            precondition((model.tincanRoster == nil) == failing)
+            let initialReads = await api.rosterReads()
+            precondition(initialReads == 1)
+            let inboxReads = await api.counts().inbox
+            model.refreshOperatorTasks()
+            try await waitForInboxRead(api, after: inboxReads)
+            try await wait(until: { !model.isRefreshingTincan }, message: "Repeated poll did not settle")
+            let repeatedReads = await api.rosterReads()
+            precondition(repeatedReads == 1, "Roster must not reread on every held poll")
+            precondition(model.tincanInbox?.heldCount == 1 && model.tincanAccess == .ready,
+                         "Roster failure must not disable task/approval metadata")
+            await api.setInboxMode(.offline)
+            model.refreshOperatorTasks()
+            try await wait(until: { model.tincanAccess != .ready }, message: "Offline state did not settle")
+            precondition(model.tincanRoster == nil, "Offline metadata must not present stale presence")
+        }
     }
 
     @MainActor

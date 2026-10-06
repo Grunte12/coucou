@@ -77,6 +77,10 @@ enum HubIslandContractTests {
         )) as! [String: Any]
         precondition(decisionBody["request_id"] as? String == "req-held-1")
         precondition(decisionBody["decision"] as? String == "deny")
-        print("Hub Island contract fixtures: pairing, approval, providers, jobs, Tincan inbox/trace/decision ACK, toggle and account payloads passed")
+        let roster = try decoder.decode(HubTincanRoster.self, from: Data(#"{"status":"ready","enabled":true,"agents":[{"id":"muse","name":"muse","online":true,"wake":"wait","queued":2,"claimed":0}]}"#.utf8))
+        precondition(roster.status == .ready && roster.agents[0].id == "muse")
+        precondition(roster.agents[0].online && roster.agents[0].queued == 2)
+        precondition(roster.agents[0].lastActive == nil)
+        print("Hub Island contract fixtures: pairing, approval, providers, jobs, Tincan roster/inbox/trace/decision ACK, toggle and account payloads passed")
     }
 }

@@ -151,6 +151,29 @@ struct HubTincanTraceSummary: Decodable, Equatable, Identifiable, Sendable {
     }
 }
 
+struct HubTincanAgent: Decodable, Equatable, Identifiable, Sendable {
+    let id: String
+    let name: String
+    let online: Bool
+    let kind: String?
+    let wake: String?
+    let version: String?
+    let lastActive: String?
+    let queued: Int
+    let claimed: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, name, online, kind, wake, version, queued, claimed
+        case lastActive = "last_active"
+    }
+}
+
+struct HubTincanRoster: Decodable, Equatable, Sendable {
+    let status: HubTincanStatus
+    let enabled: Bool
+    let agents: [HubTincanAgent]
+}
+
 struct HubTincanInbox: Decodable, Equatable, Sendable {
     let status: HubTincanStatus
     let enabled: Bool
@@ -304,12 +327,17 @@ protocol HubIslandAPI: Sendable {
     func snapshot(credential: String) async throws -> HubSnapshot
     func updateTool(credential: String, update: HubToolUpdate) async throws -> HubSnapshot
     func tincanInbox(credential: String) async throws -> HubTincanInbox
+    func tincanRoster(credential: String) async throws -> HubTincanRoster
     func tincanTrace(credential: String, traceID: String) async throws -> HubTincanTrace
     func decideTincanRequest(credential: String, requestID: String,
                              decision: HubTincanDecision) async throws -> HubTincanDecisionAcknowledgement
 }
 
 extension HubIslandAPI {
+    func tincanRoster(credential: String) async throws -> HubTincanRoster {
+        throw HubIslandAPIError.invalidResponse
+    }
+
     func tincanInbox(credential: String) async throws -> HubTincanInbox {
         throw HubIslandAPIError.invalidResponse
     }
@@ -388,6 +416,18 @@ final class HubIslandAPIClient: HubIslandAPI, @unchecked Sendable {
         let (data, response) = try await send(path: "/api/island/tincan", method: "GET", credential: credential)
         try requireOperatorSuccess(response)
         return try decode(HubTincanInbox.self, from: data)
+    }
+
+    func tincanRoster(credential: String) async throws -> HubTincanRoster {
+        let (data, response) = try await send(path: "/api/island/tincan/agents", method: "GET", credential: credential)
+        try requireOperatorSuccess(response)
+        let roster = try decode(HubTincanRoster.self, from: data)
+        guard roster.agents.count <= 128,
+              Set(roster.agents.map(\.id)).count == roster.agents.count,
+              roster.agents.allSatisfy({ !$0.id.isEmpty && $0.id == $0.name && $0.queued >= 0 && $0.claimed >= 0 }) else {
+            throw HubIslandAPIError.invalidResponse
+        }
+        return roster
     }
 
     func tincanTrace(credential: String, traceID: String) async throws -> HubTincanTrace {

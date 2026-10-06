@@ -18,6 +18,8 @@ test('Coucou host owns metadata polling lifecycle, not a second window', () => {
   assert.match(delegate, /CoucouHubIntegration\.shared\.start\(\)/);
   assert.match(delegate, /CoucouHubIntegration\.shared\.stop\(\)/);
   assert.doesNotMatch(delegate, /HubIslandWindowController/);
+  assert.match(delegate, /islandController\?\.collapse\(\)/);
+  assert.match(source('Sources/App/CoucouHubIntegration.swift'), /post\(name: \.coucouHubCollapse/);
 });
 test('merged target preserves installed identity and excludes standalone entry point', () => {
   const target = source('project.yml').split('\ntargets:\n')[1].split('\n  NotchBuddy:')[0];

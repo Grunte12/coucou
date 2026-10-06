@@ -3,6 +3,10 @@ import Foundation
 import SwiftUI
 import AppKit
 
+extension Notification.Name {
+    static let coucouHubCollapse = Notification.Name("coucouHubCollapse")
+}
+
 /// Local integration only. Official Tincan remains the message consumer;
 /// this model observes the existing operator API, never claims an inbox.
 @MainActor
@@ -26,7 +30,9 @@ struct CoucouHubPane: View {
                                           auxiliaryLeftWidth: nil, auxiliaryRightWidth: nil,
                                           menuBarHeight: state.notchHeight),
             onOpenConsole: { NSWorkspace.shared.open(HubIslandEndpoint.console) },
-            onClose: { state.view = state.tasks.isEmpty ? .empty : .overview },
+            onClose: {
+                NotificationCenter.default.post(name: .coucouHubCollapse, object: nil)
+            },
             embedded: true
         )
         .task {

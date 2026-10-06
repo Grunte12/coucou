@@ -4,6 +4,12 @@ This fork preserves Coucou as the native macOS notch UI. Official Agent Tincan
 remains responsible for agent messaging and wake; Agent LinkHub remains the
 tools-only MCP gateway. Neither upstream service is forked into the UI.
 
+The owner-approved final UI direction is recorded in
+[COUCOU-AGENT-UI-BRIEF.md](COUCOU-AGENT-UI-BRIEF.md): extend Coucou's own components
+with agent pills, a visualization-first transfer timeline, MCP status and exact
+approvals. The embedded legacy dashboard below is a transitional integration
+test surface, not the final visual design.
+
 ## Build boundary
 
 `CoucouHub` builds the existing Coucou entry point, window, state machine,
@@ -42,6 +48,10 @@ is an explicit operation through Coucou, not an automatic installer side effect.
 - Existing pairing and scoped Keychain lookup are reused. Deployment must retain
   the operator's stable signing identity; do not replace it with an ad-hoc build
   and claim cross-update Keychain access is preserved.
+- Real joined-agent presence comes from the separate bounded read-only roster
+  projection. It piggybacks on metadata polling at most once per 30 seconds;
+  failure does not disable independent task/approval reads. No keys or webhook
+  targets are returned, and presence is not proof of task execution.
 
 ## Acceptance status
 
@@ -50,8 +60,16 @@ contract/model/operator/geometry/sound fixture suites passed, and four added
 build-boundary checks passed. No installed app, credentials, hooks, account
 configuration or upstream runtime was replaced during these checks.
 
-Still pending: actual native integrated-pane QA, signed replacement/relaunch of
-the canonical app, and live integrated approval checks. Task-to-session dynamic
+The canonical macOS app was subsequently replaced recoverably with the signed
+integrated build using the same certificate-pinned designated requirement. The
+native UI displayed Connected / Manager ready, real Tools, Activity jobs and
+Tincan Tasks. Opening a historical answered task showed its matching reply and
+events; no approval buttons were offered for that answered task. Only one
+canonical notch process was running. No fresh Keychain prompt was observed in
+this launch. Private screenshots and task data are not published in this fork.
+
+Still pending: live integrated approval checks with an isolated held request,
+reboot recovery and the newer upstream session adapters. Task-to-session dynamic
 routing and routing controls are not implemented by this migration. Do not infer
 these gates from a build or fixtures. The existing single-chat Codex wake adapter
 is a separate local component and is not installed by this repository.
