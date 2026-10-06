@@ -85,7 +85,17 @@ not complete: the computer-use connection closed during Settings inspection
 not recover it; the app process itself remained running. Do not report this as
 a visual/interaction pass. The subsequent bounded-trace display correction
 (show every step, including the selected request) is source-verified but still
-needs deployment/relaunch with the final combined build.
+was deployed/relaunched together with the selection-layout correction below.
+
+The owner-reported name/Mochi collision and selected-agent overflow were fixed
+by reserving an icon column in integrated pills, constraining workspace and
+roster/detail frames to the host proposal, and scrolling long details inside the
+same inset card. The canonical app was replaced after the owner quit it, using
+the same pinned signing identity and a recoverable previous bundle. Xcode build,
+Swift fixture suites and five structural integration checks passed. Computer-use
+reconnected and rendered the compact notch, but synthetic clicks did not expand
+it, so rendered agent-selection verification is still pending; source guards are
+not a visual pass.
 
 Still pending: full native workspace interaction checks, live integrated approval checks with an isolated held request,
 reboot recovery and the newer upstream session adapters. Task-to-session dynamic

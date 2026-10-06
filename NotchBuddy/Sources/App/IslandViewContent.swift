@@ -2317,6 +2317,24 @@ struct AgentPill: View {
                               : Color(hex: "#0E0F11"))
                     Capsule()
                         .stroke(Color(hex: task.color).opacity(isHovered ? 0.55 : 0.14), lineWidth: 1)
+                    #if COUCOU_HUB
+                    // Reserve a real icon column: centered overlay labels
+                    // collide with Mochi as soon as a name is longer than Muse.
+                    HStack(spacing: 6) {
+                        MiniBotCanvasView(task: task)
+                            .frame(width: 22 / 0.6, height: 22 / 0.6)
+                            .frame(width: 30, height: 22, alignment: .center)
+                        Text(displayName)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(isHovered
+                                             ? Color(hex: task.color).lighter(by: 0.3)
+                                             : Color(hex: "#6B7079"))
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .padding(.horizontal, 6)
+                    #else
                     HStack(spacing: 0) {
                         MiniBotCanvasView(task: task)
                             .frame(width: 22 / 0.6, height: 22 / 0.6)
@@ -2332,6 +2350,7 @@ struct AgentPill: View {
                         .lineLimit(1)
                         .truncationMode(.tail)
                         .frame(maxWidth: .infinity, alignment: .center)
+                    #endif
                 }
                 .frame(maxWidth: .infinity)
                 .frame(height: 28)
@@ -2345,6 +2364,7 @@ struct AgentPill: View {
             }
         }
         .buttonStyle(.plain)
+        .help(displayName)
         .scaleEffect(isHovered ? 1.04 : 1.0)
         .brightness(isHovered ? 0.06 : 0)
         .onHover { newHover in

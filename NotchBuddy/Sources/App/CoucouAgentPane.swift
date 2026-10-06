@@ -60,7 +60,10 @@ struct CoucouAgentWorkspace: View {
     var body: some View {
         ZStack(alignment: .leading) {
             CardBackground(wash: nil)
-            VStack(alignment: .leading, spacing: 8) {
+            // The host owns the notch size. Intrinsic text/button sizes must
+            // never enlarge it when the selected agent changes.
+            GeometryReader { bounds in
+              VStack(alignment: .leading, spacing: 8) {
                 header
                 if model.canPair || model.connection == .awaitingApproval || model.pairing != nil {
                     pairingStrip
@@ -77,10 +80,13 @@ struct CoucouAgentWorkspace: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .id(tab)
                 .transition(.opacity)
+              }
+              .frame(width: max(0, bounds.size.width - 100),
+                     height: max(0, bounds.size.height - 24), alignment: .topLeading)
+              .padding(.leading, 84)
+              .padding(.trailing, 16)
+              .padding(.vertical, 12)
             }
-            .padding(.leading, 84)
-            .padding(.trailing, 16)
-            .padding(.vertical, 12)
         }
         .onExitCommand(perform: onClose)
         .onAppear(perform: observeTransfers)
@@ -282,10 +288,11 @@ struct CoucouAgentWorkspace: View {
             let visible = showAllAgents ? roster.agents : roster.agents.filter { !CoucouHubFormat.isDiagnostic($0) }
             let rows = visible.map { AgentRow(agent: $0, task: task(for: $0)) }
             let selected = roster.agents.first { $0.id == selectedAgentID } ?? visible.first
-            HStack(alignment: .top, spacing: 10) {
+            GeometryReader { bounds in
+              HStack(alignment: .top, spacing: 10) {
                 VStack(alignment: .leading, spacing: 6) {
                     ScrollView(.vertical, showsIndicators: false) {
-                        LazyVGrid(columns: [GridItem(.flexible(), spacing: 4), GridItem(.flexible(), spacing: 4)], spacing: 4) {
+                        LazyVGrid(columns: [GridItem(.flexible(minimum: 0), spacing: 4), GridItem(.flexible(minimum: 0), spacing: 4)], spacing: 4) {
                             ForEach(rows) { row in
                                 AgentPill(task: row.task, state: state, swapping: .constant(false)) {
                                     SoundEngine.shared.play("blip")
@@ -315,8 +322,14 @@ struct CoucouAgentWorkspace: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .frame(width: 236)
-                if let selected { agentDetail(selected) }
+                .frame(width: 236, height: bounds.size.height, alignment: .topLeading)
+                if let selected {
+                    agentDetail(selected)
+                        .frame(width: max(0, bounds.size.width - 246),
+                               height: bounds.size.height, alignment: .topLeading)
+                }
+              }
+              .frame(width: bounds.size.width, height: bounds.size.height, alignment: .topLeading)
             }
         }
     }
@@ -337,7 +350,9 @@ struct CoucouAgentWorkspace: View {
         let label = CoucouHubFormat.display(agent.name.isEmpty ? agent.id : agent.name)
         let (presenceText, presenceHex) = presence(agent)
         let wakeMissing = wakeText(agent) == "Not configured"
-        return VStack(alignment: .leading, spacing: 7) {
+        return GeometryReader { bounds in
+          ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 7) {
                 Circle().fill(Color(hex: CoucouHubFormat.color(for: agent.id))).frame(width: 8, height: 8)
                 Text(label).font(.system(size: 12.5, weight: .semibold)).foregroundColor(Color(hex: "#F5F6F8")).lineLimit(1)
@@ -376,12 +391,17 @@ struct CoucouAgentWorkspace: View {
             if wakeMissing || !agent.online {
                 Text("Wake from here isn’t available yet; the Hub has no such action.")
                     .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079"))
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            }
+            .frame(maxWidth: .infinity, minHeight: max(0, bounds.size.height - 20), alignment: .topLeading)
+            .padding(10)
+          }
         }
-        .padding(10)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color(hex: "#0E0F11")))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
     }
 
     private func factRow(_ key: String, _ value: String, warn: Bool = false) -> some View {
@@ -389,6 +409,8 @@ struct CoucouAgentWorkspace: View {
             Text(key).font(.system(size: 11)).foregroundColor(Color(hex: "#6B7079")).frame(width: 66, alignment: .leading)
             Text(value).font(.system(size: 11, weight: .medium))
                 .foregroundColor(warn ? Color(hex: "#F5A524") : Color(hex: "#C5C8CD")).lineLimit(1)
+                .truncationMode(.middle)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
     }
 

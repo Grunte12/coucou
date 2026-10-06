@@ -44,3 +44,19 @@ test('Coucou-native workspace keeps exact-request approval predicate and primiti
   assert.match(source('Sources/App/IslandRootView.swift'), /hubModel\.heldRequestCount/);
   assert.match(source('Sources/App/IslandWindowController.swift'), /#if COUCOU_HUB\s+return \.linkHub/);
 });
+
+test('agent selection cannot resize the host or overlap labels with Mochi', () => {
+  const pane = source('Sources/App/CoucouAgentPane.swift');
+  const detail = pane.split('private func agentDetail(')[1].split('private func factRow(')[0];
+  assert.match(pane, /height: max\(0, bounds\.size\.height - 24\)/);
+  assert.match(pane, /height: bounds\.size\.height, alignment: \.topLeading/);
+  assert.match(detail, /GeometryReader/);
+  assert.match(detail, /ScrollView\(\.vertical\)/);
+  assert.match(detail, /fixedSize\(horizontal: false, vertical: true\)/);
+  const pill = source('Sources/App/IslandViewContent.swift').split('struct AgentPill: View')[1].split('struct PillBadgeView')[0];
+  const integrated = pill.split('// Reserve a real icon column:')[1].split('#else')[0];
+  assert.match(integrated, /HStack\(spacing: 6\)/);
+  assert.match(integrated, /frame\(width: 30, height: 22/);
+  assert.match(integrated, /Text\(displayName\)/);
+  assert.match(integrated, /alignment: \.leading/);
+});
