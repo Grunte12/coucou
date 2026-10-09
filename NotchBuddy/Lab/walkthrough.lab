@@ -1,0 +1,170 @@
+# Seed Lab walkthrough: every workspace section and the states that matter.
+# scripts/seed-lab.sh OUT NotchBuddy/Lab/walkthrough.lab
+# Rail (window points): agents 93,131 · shelf 93,161 · clipboard 93,191 · usage 93,221
+
+fixture calm
+expand
+wait 1
+snap 01-agents-calm
+
+fixture approval
+wait 1.5
+snap 02-agents-approval
+film 03-rice-approval 1.6 5 8 crop=40,40,100,90
+
+fixture busy
+wait 1
+film 04-rice-working 1.6 5 8 crop=40,40,100,90
+
+fixture offline
+wait 1
+snap 05-agents-offline
+fixture calm
+wait 0.6
+
+# Shelf: empty, drag hover, drops, missing original, full
+click 93 161
+snap 06-shelf-empty
+dragover on
+snap 07-shelf-dragover
+dragover off
+drop 3
+wait 0.8
+film 08-rice-dropin 1.2 5 6 crop=40,40,100,90
+snap 09-shelf-three
+drop 4
+unlink
+section usage
+section shelf
+wait 0.4
+snap 10-shelf-missing
+drop 50
+wait 0.8
+snap 11-shelf-full
+
+# Clipboard: nothing, text, link, image, private, history
+click 93 191
+copy clear
+wait 1.3
+snap 12-clipboard-empty
+copy text "Ship the notch shelf after the lab pass. ข้าวสวยร้อนๆ"
+wait 1.3
+snap 13-clipboard-text
+copy url
+wait 1.3
+snap 14-clipboard-url
+copy image
+wait 1.3
+snap 15-clipboard-image
+copy private
+wait 1.3
+snap 16-clipboard-private
+history on
+copy text "first copy"
+wait 1.3
+copy url
+wait 1.3
+copy text "third copy with a much longer line that should wrap onto a second line and then truncate neatly at the end of it"
+wait 1.3
+snap 17-clipboard-history
+click 610 66
+wait 0.3
+snap 18-clipboard-history-off
+
+# Usage: off, fresh, high, stale, passed
+click 93 221
+usage none
+relay off
+wait 0.4
+snap 19-usage-off
+usage fresh
+relay on
+wait 0.4
+snap 20-usage-fresh
+usage high
+wait 0.4
+snap 21-usage-high
+usage stale
+wait 0.4
+snap 22-usage-stale
+usage passed
+wait 0.4
+snap 23-usage-passed
+
+# Back to agents; collapse
+click 93 131
+snap 24-agents-back
+collapse
+snap 25-collapsed
+
+# Mascot interaction: gaze follows the pointer, press squashes
+expand
+move 300 60 16
+film 26-gaze-right 0.8 5 4 crop=40,40,100,90
+move 60 200 16
+film 27-gaze-down-left 0.8 5 4 crop=40,40,100,90
+press 93 78 0.5
+film 28-press-release 1 8 8 crop=40,40,100,90
+
+# Agent timeline (swimlanes): now, lane focus, history pan, selected message card.
+# Header tab Timeline is at 255,66. Fixture set before expand (the roster refreshes every 30 s).
+collapse
+fixture timeline
+expand
+wait 1.2
+click 255 66
+wait 1
+snap 30-timeline-now
+click 186 147
+wait 0.6
+snap 31-timeline-focus
+click 186 147
+scroll 450 150 0 160
+wait 0.6
+snap 32-timeline-history
+click 593 130
+wait 0.6
+snap 33-timeline-selected
+
+# Seed's Action Ring: tap Seed (93,78), point at a slot, pick; flick in one gesture; editor.
+collapse
+fixture calm
+expand
+wait 1.4
+click 93 78
+wait 0.6
+move 168 150
+wait 0.5
+snap 40-ring-pointing
+click 168 150
+wait 0.8
+snap 41-ring-picked-shelf
+flick 93 78 150 150 0.4
+wait 0.8
+snap 42-ring-flick-clipboard
+click 93 78
+wait 0.6
+click 248 215
+wait 0.8
+snap 43-ring-customize
+
+# Drops from agent apps (text, link, image) and pinned folders. Folders rail icon is at 93,251.
+collapse
+fixture calm
+expand
+wait 1.2
+section shelf
+dropin text let seed = Seed()
+dropin link https://example.com/docs
+dropin image
+wait 0.6
+snap 50-drops-on-shelf
+click 93 251
+wait 0.5
+snap 51-folders-empty
+pin
+wait 0.6
+snap 52-folders-pinned
+click 400 140
+wait 0.6
+snap 53-folders-subfolder

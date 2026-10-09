@@ -89,6 +89,14 @@ enum CoucouHubFormat {
          "denied", "declined", "failed", "error", "expired"].contains(raw.lowercased())
     }
 
+    /// Compare communication revisions, not just IDs: replies reuse request IDs.
+    static func changedTransfers(previous: [String: HubTincanTraceSummary], current: [HubTincanTraceSummary]) -> Set<String> {
+        Set(current.filter { entry in
+            guard let old = previous[entry.requestID] else { return true }
+            return old.state != entry.state || old.activityAt != entry.activityAt
+        }.map(\.requestID))
+    }
+
     /// Newest first, stable on equal timestamps; held and traces merged by request ID.
     static func transfers(_ inbox: HubTincanInbox) -> [HubTincanTraceSummary] {
         var seen = Set<String>()
@@ -98,7 +106,7 @@ enum CoucouHubFormat {
         }
         // Parse once per row: RFC3339 offsets/fractional seconds are not safely
         // ordered lexically. Unknown dates stay at the end, with stable IDs.
-        return merged.map { ($0, date($0.createdAt) ?? .distantPast) }
+        return merged.map { ($0, date($0.activityAt) ?? .distantPast) }
             .sorted { ($0.1, $0.0.requestID) > ($1.1, $1.0.requestID) }
             .map(\.0)
     }

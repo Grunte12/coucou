@@ -35,6 +35,11 @@ export class RiceMotion {
   constructor() {
     this.state = 'idle';
     this.springs = Object.fromEntries(Object.entries(poses.idle).map(([k, v]) => [k, new Spring(v)]));
+    // Pointer feedback is deliberately independent from the state-pose springs:
+    // selecting a state must not reset cursor momentum or an in-progress press.
+    this.cursorX = new Spring(0);
+    this.cursorY = new Spring(0);
+    this.press = new Spring(1);
     this.elapsed = 0;
   }
   select(state) {
@@ -43,13 +48,25 @@ export class RiceMotion {
     for (const [key, value] of Object.entries(poses[state])) this.springs[key].to(value);
     return true;
   }
+  setCursor(x, y) {
+    this.cursorX.to(Math.max(-3, Math.min(3, Number.isFinite(x) ? x : 0)));
+    this.cursorY.to(Math.max(-2, Math.min(2, Number.isFinite(y) ? y : 0)));
+  }
+  clearCursor() { this.setCursor(0, 0); }
+  setPressed(pressed) { this.press.to(pressed ? .97 : 1); }
   frame(dt, reduced = false, paused = false) {
     if (!paused) this.elapsed += Math.min(Math.max(dt, 0), .05);
     const values = Object.fromEntries(Object.entries(this.springs).map(([k, spring]) => {
       if (reduced) spring.snap(); else if (!paused) spring.step(dt);
       return [k, spring.value];
     }));
-    if (!reduced && !paused) {
+    for (const [key, spring] of Object.entries({ cursorX: this.cursorX, cursorY: this.cursorY, press: this.press })) {
+      if (reduced) spring.snap(); else if (!paused) spring.step(dt);
+      values[key] = spring.value;
+    }
+    // Pausing freezes elapsed time as well as the springs. Keep deriving the
+    // decorative motion from that frozen clock so entering pause is continuous.
+    if (!reduced) {
       const breath = Math.sin(this.elapsed * 2.3);
       values.sy *= 1 + breath * .012;
       values.sx *= 1 - breath * .009;

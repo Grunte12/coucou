@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rice motion lab v4</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0c0e;--card:#141518;--line:rgba(255,255,255,.07);--tx:#f5f6f8;--mu:#8e939c;--dim:#6b7079;--gold:#ffd21a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Thonburi",system-ui,sans-serif}
+header{padding:18px 22px 6px;display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+h1{margin:0;font-size:18px}header p{margin:4px 0 0;color:var(--mu);max-width:780px}
+.wrap{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:18px;padding:14px 22px 40px;align-items:start}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}.left{position:static!important}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.left{position:sticky;top:12px;display:grid;gap:12px}
+#stage{position:relative;height:330px;border-radius:14px;background:#000;overflow:hidden;cursor:default;touch-action:none;user-select:none}
+#stage .big{position:absolute;left:50%;top:50%;width:240px;height:240px;margin:-120px 0 0 -120px;cursor:pointer}
+#stage .hint{position:absolute;left:12px;bottom:10px;color:var(--dim);font-size:12px}
+#stage .tag{position:absolute;right:12px;top:10px;color:var(--mu);font-size:12px}
+#cap{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:4px 12px;border-radius:999px;background:#141416;border:1px solid rgba(255,210,26,.28);color:#fff3c4;font-size:12.5px;opacity:0;transition:opacity .45s cubic-bezier(.2,.8,.2,1);white-space:nowrap;pointer-events:none}
+#cap.on{opacity:1}
+.small{display:flex;align-items:center;gap:18px;background:#000;border-radius:12px;padding:10px 14px}
+.small span{color:var(--dim);font-size:11px}
+.tools{display:flex;gap:14px;flex-wrap:wrap;color:var(--mu);font-size:13px;align-items:center}
+.tools label{display:flex;gap:6px;align-items:center}
+h2{margin:0 0 8px;font-size:13px;color:var(--mu);font-weight:600;letter-spacing:.02em}
+.group{margin-bottom:16px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:#0e0f11}
+.item.off{opacity:.45}
+.item b{font-weight:600}.item small{display:block;color:var(--mu)}
+.item small.intent{color:#d8c27a;margin-top:2px}
+.item code{color:var(--gold);font-size:11px;margin-right:6px}
+button.play{background:#1d1f23;color:var(--tx);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font:inherit;cursor:pointer}
+button.play:hover{background:#26282d}button.play:focus-visible,#copy:focus-visible{outline:2px solid var(--gold)}
+.choice{margin-bottom:12px}.choice .q{font-weight:600;margin-bottom:5px}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opts label{border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;color:var(--mu)}
+.opts input{position:absolute;opacity:0}
+.opts label:has(input:checked){background:#1d1f23;color:var(--tx);border-color:rgba(255,210,26,.6)}
+.opts label:has(input:focus-visible){outline:2px solid var(--gold)}
+.strip{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;background:#000;border-radius:12px;padding:12px 8px 10px}
+.strip div{display:flex;flex-direction:column;align-items:center;gap:4px}
+.strip span{color:var(--dim);font-size:10.5px;text-align:center;line-height:1.25}
+textarea{width:100%;height:250px;background:#0e0f11;color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.5 ui-monospace,Menlo,monospace}
+#copy{margin-top:6px}.state{color:var(--gold);font-size:12px}
+.note{color:var(--mu);font-size:12px;margin:6px 0 0}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Rice motion lab v4 — สงบ พรีเมียม มีเอกลักษณ์</h1>
+  <p>ทุกท่าอ่านได้จากท่าทางของตัวก่อน แล้วใช้ "ภาษาแสง" ชุดเดียวของเราเสริม: ระลอกแสงรูปเมล็ดข้าว · แสงวิ่งผ่านขอบ · ออร่าหายใจ · จุดแสงลอย · แอ่งแสงใต้ตัว ไม่มีดาว ไม่มีอะไรแหลม ลองขยับเมาส์ กดที่ตัว ลากไฟล์จริงมาวางในกรอบดำ กด Play แล้วคัดลอกผลท้ายหน้าส่งกลับมา</p></div>
+  <div class="opts" role="group" aria-label="ภาษาคำพูดสั้นๆ / caption language"><label><input type="radio" autocomplete="off" name="lang" value="th" checked>ไทย</label><label><input type="radio" autocomplete="off" name="lang" value="en">English</label></div>
+</header>
+<div class="wrap">
+  <div class="left">
+    <div class="panel">
+      <div id="stage" aria-label="พื้นที่ทดลอง"><div class="tag" id="tag">idle</div><div id="cap" role="status"></div><div class="hint">ขยับเมาส์ · กด · กดค้าง · ลากไฟล์มาวาง</div></div>
+      <div class="small" style="margin-top:10px"><div id="s36"></div><div id="s52"></div><span>36 px / 52 px — ขนาดจริงใน notch (ตัดขอบเหมือนในแอป)</span></div>
+      <div class="tools" style="margin-top:10px">
+        <label><input type="checkbox" autocomplete="off" id="reduced">Reduce Motion</label>
+        <label><input type="checkbox" autocomplete="off" id="pause">พัก / Pause</label>
+        <button class="play" id="toggleOpen">ปิด island (X1)</button>
+      </div>
+    </div>
+    <div class="panel"><h2>ท่าตามสถานะ (S1–S7)</h2><div class="opts" id="states"></div><p class="state" id="stateLabel"></p></div>
+  </div>
+  <div>
+    <div class="panel group"><h2>เทียบทุกท่าพร้อมกันที่ 52 px · All states side by side at 52 px</h2><div class="strip" id="strip"></div><p class="note">ดูจากรูปทรงอย่างเดียว แยกออกไหมว่าตัวไหนคิด ทำงาน ส่ง รออนุมัติ เสร็จ หรือหลับ</p></div>
+    <div class="panel group"><h2>ตัวเลือกที่ต้องเลือก</h2><div id="choices"></div></div>
+    <div class="panel group"><h2>รายการ motion — กด Play · ติ๊กออกถ้าไม่เอา</h2><div id="catalog"></div></div>
+    <div class="panel"><h2>ผลที่คุณเลือก (คัดลอกส่งกลับมาได้เลย)</h2><textarea id="out" readonly aria-label="ผลที่เลือก"></textarea><br><button class="play" id="copy">คัดลอก</button></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="rFill" cx=".42" cy=".36" r=".78"><stop stop-color="#fff"/><stop offset=".74" stop-color="#fff"/><stop offset=".88" stop-color="#fffdf2"/><stop offset=".95" stop-color="#fff5c4"/><stop offset="1" stop-color="#ffe680"/></radialGradient>
+  <linearGradient id="rRim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff58a"/><stop offset=".4" stop-color="#ffd400"/><stop offset="1" stop-color="#ffb800"/></linearGradient>
+  <radialGradient id="rBottom" cx=".5" cy="1" r=".7"><stop stop-color="#ffc800" stop-opacity=".4"/><stop offset="1" stop-color="#ffc800" stop-opacity="0"/></radialGradient>
+  <radialGradient id="rHalo"><stop stop-color="#ffe94d" stop-opacity=".9"/><stop offset=".5" stop-color="#ffdd33" stop-opacity=".55"/><stop offset=".74" stop-color="#ffd400" stop-opacity=".18"/><stop offset="1" stop-color="#ffd400" stop-opacity="0"/></radialGradient>
+  <radialGradient id="rPool"><stop stop-color="#ffd84a" stop-opacity=".55"/><stop offset=".55" stop-color="#ffcc22" stop-opacity=".18"/><stop offset="1" stop-color="#ffcc22" stop-opacity="0"/></radialGradient>
+  <filter id="rGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="12"/></filter>
+  <filter id="rRimGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter>
+  <filter id="rInner" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  <filter id="rSoft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.3"/></filter>
+  <filter id="rSoft3" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="3.2"/></filter>
+  <filter id="rMote" x="-150%" y="-150%" width="400%" height="400%"><feGaussianBlur stdDeviation="1.6"/></filter>
+</defs></svg>
+
+<script>
+'use strict';
+// ---------- physics: same spring model as motion.mjs (substeps <= 1/120 s, dt cap 50 ms) ----------
+class Spring{
+  constructor(v,k=170,c=25){this.v=this.t=v;this.vel=0;this.k=k;this.c=c}
+  to(t){this.t=t} kick(x){this.vel+=x} snap(){this.v=this.t;this.vel=0}
+  step(s){let r=Math.min(Math.max(s,0),.05);while(r>0){const d=Math.min(r,1/120);this.vel+=(this.k*(this.t-this.v)-this.c*this.vel)*d;this.v+=this.vel*d;r-=d}}
+}
+const clamp01=x=>Math.max(0,Math.min(1,x));
+const inOut=k=>{k=clamp01(k);return k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2};
+const outC=k=>1-Math.pow(1-clamp01(k),3);
+const bump=k=>(k<=0||k>=1)?0:Math.sin(Math.PI*k);
+const rand=(a,b)=>a+Math.random()*(b-a);
+const $=s=>document.querySelector(s);
+const reduced=()=>$('#reduced').checked, paused=()=>$('#pause').checked;
+
+// Posture first: each intent has its own silhouette even with every animation off.
+const POSES={
+  idle:    {x:0, y:0, angle:-4,sx:1,   sy:1,   glow:.62,eye:1,   blush:.14},
+  thinking:{x:2, y:-4,angle:-11,sx:.97,sy:1.04,glow:.5, eye:.95, blush:.1},
+  working: {x:0, y:3, angle:5, sx:1.05,sy:.95, glow:.8, eye:.82, blush:.12},
+  sending: {x:2, y:-2,angle:8, sx:.98, sy:1.02,glow:.85,eye:.95, blush:.12},
+  approval:{x:0, y:-5,angle:0, sx:.97, sy:1.05,glow:.85,eye:1.15,blush:.08},
+  done:    {x:0, y:-3,angle:0, sx:1.02,sy:.99, glow:.95,eye:1,   blush:.55},
+  resting: {x:-4,y:22,angle:-80,sx:1.04,sy:.93,glow:.25,eye:.1,  blush:.18},
+};
+const STATES=Object.keys(POSES);
+const TXT={
+  th:{idle:'พร้อมแล้ว',thinking:'กำลังคิด…',working:'กำลังทำงาน…',sending:'กำลังส่ง…',approval:'รอคุณอนุมัติ',done:'เสร็จแล้ว ขอบคุณครับ',resting:'พักอยู่',wai:'สวัสดีครับ',drop:'รับไว้แล้ว',full:'ขอโทษนะ ที่เต็มแล้ว',copy:'คัดลอกแล้ว',newAppr:'มีคำขอใหม่'},
+  en:{idle:'Ready',thinking:'Thinking…',working:'Working…',sending:'Sending…',approval:'Needs your OK',done:'Done, thank you',resting:'Resting',wai:'Sawasdee — hello',drop:'Got it',full:'Sorry, shelf is full',copy:'Copied',newAppr:'New request'},
+};
+const STATE_NAME={idle:'S1 idle',thinking:'S2 thinking',working:'S3 working',sending:'S4 sending',approval:'S5 approval',done:'S6 done',resting:'S7 resting'};
+const SPRINGS={calm:[200,26],soft:[220,19],jelly:[240,14]};
+const GAZE={subtle:[5,3],normal:[9,6],big:[12,8]}; // eye reach inside the body, rice units (clamped to an ellipse)
+const LIGHT={subtle:.65,normal:1};
+const SEND={'0':0,'3':3,'6':6};
+const choice={spring:'soft',light:'normal',motes:'few',caption:'on',gaze:'normal',spam:'accumulate',sending:'3',lotus:'off',bored:'keep',usage:'keep',lang:'th'};
+const keep={};
+
+// ---------- art ----------
+const BODY='M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z';
+const G=80; // squash anchor: the bottom of the grain, so it sits on its light pool
+const TRAIL='M0 0 C26 -2 46 -18 62 -46';
+const NS='http://www.w3.org/2000/svg';
+let uid=0;
+function makeRice(host,px,clip){
+  const id='rc'+(uid++);
+  const rip=Array.from({length:4},()=>`<path d="${BODY}" fill="none" stroke-linejoin="round" filter="url(#rSoft)" opacity="0"/>`).join('');
+  const motes=Array.from({length:6},()=>`<circle r="3" fill="#fff3b0" filter="url(#rMote)" opacity="0"/>`).join('');
+  host.innerHTML=`<svg viewBox="0 0 320 320" width="${px}" height="${px}" role="img" aria-label="rice mascot" style="display:block;overflow:${clip?'hidden':'visible'}"><clipPath id="${id}"><path d="${BODY}"/></clipPath>
+  <g class="ground"><ellipse rx="60" ry="10" fill="url(#rPool)"/></g>
+  <g class="back">
+    <circle class="track" r="102" cy="-6" fill="none" stroke="#ffd21a" stroke-width="2.5" opacity="0"/>
+    <circle class="arcG" r="102" cy="-6" fill="none" stroke="#ffd21a" stroke-width="8" stroke-linecap="round" pathLength="100" filter="url(#rSoft3)" opacity="0"/>
+    <circle class="arc" r="102" cy="-6" fill="none" stroke="#fff3b0" stroke-width="3.6" stroke-linecap="round" pathLength="100" opacity="0"/>
+  </g>
+  <g class="pose">
+    <g class="rip">${rip}</g>
+    <g class="apr" opacity="0"><path d="${BODY}" fill="none" stroke="#ffb21a" stroke-width="8" filter="url(#rSoft3)"/><path d="${BODY}" fill="none" stroke="#ffcf4d" stroke-width="2.4"/></g>
+    <ellipse class="halo2" rx="110" ry="116" cy="-6" fill="url(#rHalo)"/><ellipse class="halo" rx="90" ry="102" cy="-6" fill="url(#rHalo)"/>
+    <g class="shape">
+      <path class="bloom" d="${BODY}" fill="#ffcc00" filter="url(#rGlow)"/>
+      <path class="rimglow" d="${BODY}" fill="none" stroke="#ffd21a" stroke-width="12" filter="url(#rRimGlow)"/>
+      <path d="${BODY}" fill="url(#rFill)"/>
+      <g clip-path="url(#${id})"><path class="inner" d="${BODY}" fill="none" stroke="#ffc800" stroke-width="18" filter="url(#rInner)"/></g>
+      <path d="${BODY}" fill="url(#rBottom)"/>
+      <path d="${BODY}" fill="none" stroke="url(#rRim)" stroke-width="6.5"/>
+      <path d="${BODY}" transform="scale(.94)" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+      <path class="rpG" d="${BODY}" pathLength="100" fill="none" stroke="#fff1b8" stroke-width="9" stroke-linecap="round" filter="url(#rSoft3)" opacity="0"/>
+      <path class="rpC" d="${BODY}" pathLength="100" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity="0"/>
+      <ellipse class="hl" cx="-22" cy="-52" rx="12" ry="7" fill="#fff" opacity=".95"/>
+      <circle cx="-4" cy="-70" r="3" fill="#fff" opacity=".9"/>
+    </g>
+    <ellipse class="ch1" rx="9.5" ry="5.5" fill="#ff9f45"/><ellipse class="ch2" rx="9.5" ry="5.5" fill="#ff9f45"/>
+    <path class="a1" fill="none" stroke="#2b1d05" stroke-width="5" stroke-linecap="round"/><path class="a2" fill="none" stroke="#2b1d05" stroke-width="5" stroke-linecap="round"/>
+    <path class="l1" fill="none" stroke="#2b1d05" stroke-width="4.5" stroke-linecap="round"/><path class="l2" fill="none" stroke="#2b1d05" stroke-width="4.5" stroke-linecap="round"/>
+    <ellipse class="e1" rx="7.5" ry="11" fill="#2b1d05"/><ellipse class="e2" rx="7.5" ry="11" fill="#2b1d05"/>
+    <circle class="c1" r="2.6" fill="#fff"/><circle class="c2" r="2.6" fill="#fff"/>
+    <g class="lotus" display="none"><ellipse rx="17" ry="13" fill="#ffd21a" opacity=".35" filter="url(#rSoft3)"/>
+      <path d="M-3 9 C-12 7 -15 0 -13 -6 Q-12 -8 -10 -6 C-7 -1 -5 4 -3 9Z" fill="#ffc400"/><path d="M3 9 C12 7 15 0 13 -6 Q12 -8 10 -6 C7 -1 5 4 3 9Z" fill="#ffc400"/>
+      <path d="M-2 -12 Q0 -14 2 -12 C7 -7 8 3 0 9 C-8 3 -7 -7 -2 -12Z" fill="#ffe14d" stroke="#fff6c0" stroke-width="1.3"/></g>
+  </g>
+  <g class="front">
+    <g class="motes">${motes}</g>
+    <g class="pThink"><circle cx="-80" cy="-92" r="22" fill="#ffd21a" opacity=".22" filter="url(#rSoft3)"/><circle cx="-58" cy="-75" r="4.5" fill="#fff" stroke="#ffd21a" stroke-width="1.6"/>
+      <circle cx="-80" cy="-92" r="17" fill="#fff" stroke="#ffd21a" stroke-width="1.8"/>
+      <circle class="td0" cx="-87.5" cy="-92" r="2.7" fill="#d29a12"/><circle class="td1" cx="-80" cy="-92" r="2.7" fill="#d29a12"/><circle class="td2" cx="-72.5" cy="-92" r="2.7" fill="#d29a12"/></g>
+    <g class="pAppr"><circle cx="60" cy="-80" r="17" fill="#ffb21a" opacity=".35" filter="url(#rSoft3)"/><circle cx="60" cy="-80" r="12" fill="#ffc22e"/>
+      <path d="M60 -86 V-79.5" stroke="#4a3200" stroke-width="3.8" stroke-linecap="round"/><circle cx="60" cy="-73.6" r="2.1" fill="#4a3200"/></g>
+    <g class="pDone"><circle cx="60" cy="-80" r="17" fill="#ffd21a" opacity=".3" filter="url(#rSoft3)"/><circle cx="60" cy="-80" r="12" fill="#ffd84a"/>
+      <path d="M54.5 -80 l3.8 4 l7 -8" fill="none" stroke="#4a3200" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <path class="z0" d="M-5 -5 H5 L-5 5 H5" fill="none" stroke="#fff1b0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+    <path class="z1" d="M-5 -5 H5 L-5 5 H5" fill="none" stroke="#fff1b0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0"/>
+  </g>
+  <g transform="translate(160 168) scale(1.4)">
+    <g class="trail" opacity="0"><path class="trG" d="${TRAIL}" pathLength="100" fill="none" stroke="#ffd21a" stroke-width="8" stroke-linecap="round" filter="url(#rSoft3)"/><path class="trC" d="${TRAIL}" pathLength="100" fill="none" stroke="#fff5cc" stroke-width="2.6" stroke-linecap="round"/>
+      <circle class="orbG" r="13" fill="#ffd84a" opacity=".55" filter="url(#rSoft3)"/><circle class="orb" r="5.2" fill="#fff"/></g>
+    <g class="file" opacity="0"><circle r="22" fill="#ffd21a" opacity=".28" filter="url(#rSoft3)"/>
+      <rect x="-11" y="-14" width="22" height="28" rx="6" fill="#fffbe8" stroke="#ffc400" stroke-width="2.2"/>
+      <path d="M-5 -3 H5 M-5 4 H2" stroke="#e0a800" stroke-width="2.2" stroke-linecap="round"/></g>
+  </g></svg>`;
+  const q=s=>host.querySelector(s);
+  const trG=q('.trG');
+  return{svg:q('svg'),ground:q('.ground'),back:q('.back'),pose:q('.pose'),front:q('.front'),shape:q('.shape'),halo:q('.halo'),halo2:q('.halo2'),bloom:q('.bloom'),rimglow:q('.rimglow'),inner:q('.inner'),hl:q('.hl'),
+    e1:q('.e1'),e2:q('.e2'),c1:q('.c1'),c2:q('.c2'),ch1:q('.ch1'),ch2:q('.ch2'),a:[q('.a1'),q('.a2')],l:[q('.l1'),q('.l2')],lotus:q('.lotus'),
+    rip:[...q('.rip').children],rpG:q('.rpG'),rpC:q('.rpC'),motes:[...q('.motes').children],apr:q('.apr'),
+    track:q('.track'),arc:q('.arc'),arcG:q('.arcG'),think:q('.pThink'),td:[q('.td0'),q('.td1'),q('.td2')],badgeA:q('.pAppr'),badgeD:q('.pDone'),z:[q('.z0'),q('.z1')],
+    trail:q('.trail'),trG,trC:q('.trC'),orb:q('.orb'),orbG:q('.orbG'),trailLen:trG.getTotalLength(),file:q('.file')};
+}
+function pop(el,ax,ay,s){
+  if(s<.01){el.setAttribute('display','none');return}
+  el.removeAttribute('display');
+  el.setAttribute('transform',`translate(${ax} ${ay}) scale(${s}) translate(${-ax} ${-ay})`);
+  el.setAttribute('opacity',clamp01(s));
+}
+
+// ---------- the character ----------
+class Mascot{
+  constructor(hosts,isMain){
+    this.isMain=isMain;this.views=hosts.map(h=>makeRice(h.el,h.px,h.clip));
+    const S=(v,k,c)=>new Spring(v,k,c);
+    this.state='idle';this.since={};STATES.forEach(s=>this.since[s]=0);
+    this.pose={};for(const k of['x','y','angle','sx','sy','glow','eye'])this.pose[k]=S(POSES.idle[k],150,24);
+    this.W={};this.PR={};for(const s of STATES){this.W[s]=S(s==='idle'?1:0,150,24);this.PR[s]=S(0,180,20)}
+    Object.assign(this,{
+      curX:S(0,170,24),curY:S(0,170,24),lookX:S(0,150,24),lookY:S(0,150,24),lean:S(0,140,23),tilt:S(0,120,20),shakeA:S(0,200,17),
+      sqx:S(1,220,19),sqy:S(1,220,19),scale:S(1,200,22),hop:S(0,160,20),bow:S(0,90,19),stretch:S(0,170,24),
+      blink:S(1,420,34),boost:S(0,150,24),blush:S(.14,150,24),smile:S(0,200,26),sleep:S(0,170,26),
+      flare:S(0,140,20),dim:S(0,150,24),check:S(0,180,20),lotus:S(0,180,22),recv:S(0,150,24),fileA:S(0,260,30),
+      hmm:S(0,90,19),dip:S(0,320,32),send:S(0,150,22),tip:S(0,200,22),
+    });
+    this.springs=[...Object.values(this.pose),...Object.values(this.W),...Object.values(this.PR),this.curX,this.curY,this.lookX,this.lookY,this.lean,this.tilt,this.shakeA,
+      this.sqx,this.sqy,this.scale,this.hop,this.bow,this.stretch,this.blink,this.boost,this.blush,this.smile,this.sleep,this.flare,this.dim,this.check,this.lotus,this.recv,this.fileA,
+      this.hmm,this.dip,this.send,this.tip];
+    this.t=0;this.tasks=[];this.ripples=[];this.rim=null;this.motes=[];this.zs=[];this.trail=null;this.file=null;
+    this.open=true;this.idleSince=0;this.isBored=false;this.nextBlink=rand(2,4);this.lastV=null;
+  }
+  // timeline on the mascot's own clock: pauses with Pause, cancellable per track ('st' state, 'ev' event, 'bk' blink)
+  at(track,delay,fn){this.tasks.push({track,t:this.t+delay,fn})}
+  cancel(track){this.tasks=this.tasks.filter(k=>k.track!==track)}
+  every(name,min,max,fn,first){const go=()=>{if(this.state!==name)return;if(!reduced())fn();this.at('st',rand(min,max),go)};this.at('st',first??rand(min,max),go)}
+  applySpring(){const[k,c]=SPRINGS[choice.spring];this.sqx.k=this.sqy.k=k;this.sqx.c=this.sqy.c=c}
+
+  // ----- the brand light language (4 elements, reused with different timing and strength) -----
+  ripple(o={}){if(reduced())return;this.ripples.push(Object.assign({t0:this.t,dur:1.8,str:.6,size:.5,col:'#ffe27a',inward:false},o));if(this.ripples.length>4)this.ripples.shift()}
+  rimPass(o={}){if(reduced())return;this.rim=Object.assign({t0:this.t,dur:1.7,str:.7,p0:rand(82,92),span:rand(40,52),len:15},o)}
+  mote(from='side'){
+    if(reduced()||choice.motes==='off'||!this.open||this.motes.length>=6)return;
+    const side=Math.random()<.5?-1:1;
+    this.motes.push(from==='top'?{t0:this.t,x:rand(-24,24),y:-80,vy:-rand(11,15),life:rand(2.4,3),r:rand(2.2,3),ph:rand(0,6)}
+      :{t0:this.t,x:side*rand(46,56),y:rand(-40,6),vy:-rand(9,13),life:rand(3,4.2),r:rand(2.2,3.2),ph:rand(0,6)});
+  }
+  zz(){if(reduced())return;this.zs.push({t0:this.t,dur:3.6});if(this.zs.length>2)this.zs.shift()}
+  sendTrail(){if(reduced())return;const v=this.lastV||{x:0,y:0};this.trail={t0:this.t,dur:1.5,ox:v.x*3/1.4+44,oy:v.y*3/1.4-12}}
+
+  // ----- state -----
+  select(name,o={}){
+    const changed=this.state!==name||o.replay;this.cancel('st');
+    this.state=name;if(changed)this.since[name]=this.t;
+    const p=POSES[name];
+    for(const k in this.pose)this.pose[k].to(p[k]);
+    for(const s of STATES){this.W[s].to(s===name?1:0);this.PR[s].to(0)}
+    for(const s of[this.hmm,this.dip,this.send,this.tip])s.to(0);
+    this.blush.to(p.blush);this.smile.to(name==='done'?1:0);this.sleep.to(name==='resting'||!this.open?1:0);
+    this.check.to(0);this.lotus.to(0);this.bow.to(0);
+    const PR=this.PR[name];
+    if(name==='idle'){this.every('idle',6,11,()=>this.rimPass({dur:1.8,str:.55}),rand(1.5,3));this.every('idle',5,9,()=>this.mote(),rand(2.5,4))}
+    if(name==='thinking'){this.at('st',.25,()=>PR.to(1));this.every('thinking',3.4,5.2,()=>{this.hmm.to(1);this.at('st',rand(1,1.4),()=>this.hmm.to(0))},1.4)}
+    if(name==='working'){PR.to(1);this.at('st',.5,()=>this.typing());this.every('working',2.6,4.2,()=>this.rimPass({dur:1.15,str:.7}),.8);this.every('working',1.8,3,()=>this.mote('top'),1.2)}
+    if(name==='sending'){PR.to(1);this.at('st',.3,()=>this.sendPhrase())}
+    if(name==='approval'){PR.to(1);this.every('approval',5,7,()=>this.politeRise(),rand(2.4,3.2))}
+    if(name==='done'){if(changed)this.doneIntro();else{this.check.to(1)}this.every('done',5,8,()=>this.rimPass({dur:1.9,str:.6}),3.8);this.every('done',3,5,()=>this.mote(),2.6)}
+    if(name==='resting'){PR.to(1);this.every('resting',3.6,5.2,()=>this.zz(),.8)}
+    if(this.isMain){
+      $('#tag').textContent=name;$('#stateLabel').textContent=STATE_NAME[name]+' · '+TXT[choice.lang][name];
+      document.querySelectorAll('#states input').forEach(i=>i.checked=i.value===name);
+      if(changed&&!o.silent)caption(name);
+    }
+  }
+  // working: short typing phrases of 3-5 quiet dips, then a rest; never a fixed beat
+  typing(){
+    if(this.state!=='working')return;
+    if(!reduced()){
+      const n=3+Math.floor(rand(0,3));let tt=0;
+      for(let i=0;i<n;i++){this.at('st',tt,()=>this.dip.to(1));this.at('st',tt+.13,()=>this.dip.to(0));tt+=rand(.27,.37)}
+      if(Math.random()<.5){const d=rand(.5,.9)*(Math.random()<.5?-1:1);this.at('st',tt,()=>this.lookX.to(d));this.at('st',tt+.9,()=>this.lookX.to(0))}
+      this.at('st',tt+rand(.9,1.8),()=>this.typing());
+    }
+  }
+  // sending: gather (lean back), release (glide forward, the glow flows out as a trail), settle, long hold
+  sendPhrase(){
+    if(this.state!=='sending')return;
+    if(!reduced()){
+      this.send.to(-1);
+      this.at('st',.5,()=>{this.send.to(1);this.sendTrail();this.dim.to(.15);this.lookX.to(1.3)});
+      this.at('st',1.0,()=>this.send.to(0));
+      this.at('st',1.7,()=>{this.lookX.to(0);this.dim.to(0)});
+    }
+    this.at('st',rand(3.4,4.4),()=>this.sendPhrase());
+  }
+  politeRise(){this.tip.to(1);this.at('st',.38,()=>this.tip.to(0));this.ripple({col:'#ffbf2e',dur:2.1,str:.55,size:.45})}
+  doneIntro(){
+    this.sqx.to(1.06);this.sqy.to(.92);this.smile.to(1);
+    this.at('st',.32,()=>{this.sqx.to(1);this.sqy.to(1);this.sqy.kick(2.2);this.sqx.kick(-1.6);this.hop.kick(-110);this.check.to(1);this.flare.kick(3);this.ripple({dur:2.1,str:.7,size:.6})});
+    this.at('st',.9,()=>{this.sqx.kick(1);this.sqy.kick(-1.3)});
+    this.at('st',1.35,()=>this.wai('st',false));
+  }
+  // Thai wai: a slow bow with happy eyes, a light pass over the rim, warm motes rising
+  wai(track,cap=true){
+    if(cap&&this.isMain)caption('wai',2200);
+    this.smile.to(1);this.bow.to(1);this.lotus.to(choice.lotus==='on'?1:0);this.blush.to(.55);this.rimPass({dur:1.9,str:.8});
+    this.at(track,.5,()=>{this.mote();this.mote()});
+    this.at(track,1.25,()=>this.bow.to(0));
+    this.at(track,1.9,()=>{this.lotus.to(0);if(this.state!=='done')this.smile.to(0);this.blush.to(POSES[this.state].blush)});
+  }
+  resetEv(){
+    this.cancel('ev');const p=POSES[this.state];
+    this.sqx.to(1);this.sqy.to(1);this.scale.to(this.open?1:.88);this.hop.to(0);this.bow.to(0);this.stretch.to(0);
+    this.lookX.to(0);this.lookY.to(0);this.lean.to(0);this.tilt.to(0);this.shakeA.to(0);
+    this.boost.to(0);this.blink.to(1);this.dim.to(this.open?0:.5);this.recv.to(0);this.fileA.to(0);this.flare.to(0);
+    this.blush.to(p.blush);this.smile.to(this.state==='done'?1:0);if(this.state!=='done')this.lotus.to(0);
+    this.sleep.to(this.state==='resting'||!this.open?1:0);
+  }
+  doBlink(){this.blink.to(.1);this.cancel('bk');this.at('bk',.09,()=>this.blink.to(1))}
+  cheek(){this.blush.to(.6);this.at('ev',.8,()=>this.blush.to(POSES[this.state].blush))}
+  press(amp){this.sqx.to(1+.045*amp);this.sqy.to(Math.max(.9,1-.065*amp));this.blink.to(.55)}
+  release(amp){this.sqx.to(1);this.sqy.to(1);this.blink.to(1);this.sqy.kick(1.3*amp);this.sqx.kick(-1*amp)}
+  bored(on){this.isBored=on;if(on){this.lookY.to(.8);this.tilt.to(-3);this.boost.to(-.35)}else{this.lookY.to(0);this.tilt.to(0);this.boost.to(0)}}
+  touch(){this.idleSince=this.t;if(this.isBored)this.bored(false)}
+  setOpen(v){
+    this.open=v;
+    if(this.isMain)$('#toggleOpen').textContent=v?'ปิด island (X1)':'เปิด island (A2)';
+    if(!v){this.resetEv();this.scale.to(.88);this.sleep.to(1);this.dim.to(.5)}
+    else{this.scale.to(1);this.sleep.to(this.state==='resting'?1:0);this.dim.to(0)}
+  }
+  startHover(){
+    this.file={kind:'hover',t0:this.t};this.fileA.to(1);this.recv.to(1);this.stretch.to(1);this.boost.to(.15);
+    this.lookX.to(1.6);this.lookY.to(-1.5);this.tilt.to(6);this.lean.to(1.5);this.ripple({inward:true,dur:1.1,str:.45,size:.55});
+  }
+  endHover(){this.fileA.to(0);this.recv.to(0);this.stretch.to(0);this.boost.to(0);this.lookX.to(0);this.lookY.to(0);this.tilt.to(0);this.lean.to(0)}
+  fileNow(){
+    const f=this.file;if(!f)return null;const τ=this.t-f.t0,r=reduced(),m=r?0:1;
+    const v=this.lastV||{x:0,y:0},bx=v.x*3/1.4,by=v.y*3/1.4;
+    if(f.kind==='hover')return{x:72+Math.sin(τ*1.6)*2.5*m,y:-96+Math.sin(τ*2.1)*3*m,rot:Math.sin(τ*1.3)*4*m,s:1,o:1};
+    if(f.kind==='drop'){const k=r?(τ<.42?0:1):clamp01(τ/.42),e=inOut(k);return{x:f.fx+(bx-f.fx)*e,y:f.fy+(by-8-f.fy)*e,rot:f.frot*(1-e),s:1-.6*e,o:k<.8?1:(1-k)/.2}}
+    if(f.kind==='reject'){
+      const cx=bx+48,cy=by-74;
+      if(τ<.36){const e=r?0:inOut(τ/.36);return{x:f.fx+(cx-f.fx)*e,y:f.fy+(cy-f.fy)*e,rot:f.frot*(1-e),s:1,o:1}}
+      const k=r?(τ<.9?0:1):clamp01((τ-.36)/.7),e=outC(k);return{x:cx+44*e,y:cy-10*e,rot:8*e,s:1-.1*e,o:1-k};
+    }
+    return null;
+  }
+  dropIn(){
+    const f=this.fileNow();this.file={kind:'drop',t0:this.t,fx:f?f.x:70,fy:f?f.y:-96,frot:f?f.rot:0};this.fileA.to(1);
+    this.recv.to(0);this.stretch.to(.5);this.lookX.to(.9);this.lookY.to(-1);this.tilt.to(3);this.boost.to(.1);
+    this.at('ev',.42,()=>{this.stretch.to(0);this.tilt.to(0);this.lean.to(0);this.sqx.to(1.08);this.sqy.to(.9);this.lookX.to(0);this.lookY.to(0);this.blink.to(.25);this.fileA.to(0);this.flare.kick(2.5)});
+    this.at('ev',.68,()=>{this.sqx.to(1);this.sqy.to(1);this.sqy.kick(1.8);this.sqx.kick(-1.3);this.blink.to(1);this.boost.to(0);this.smile.to(1);this.cheek();this.ripple({dur:1.7,str:.65,size:.5})});
+    this.at('ev',1.8,()=>{if(this.state!=='done')this.smile.to(0)});
+    if(this.isMain)caption('drop');
+  }
+  reject(){
+    const f=this.fileNow();this.file={kind:'reject',t0:this.t,fx:f&&f.o>.5?f.x:96,fy:f&&f.o>.5?f.y:-104,frot:f?f.rot:0};this.fileA.to(1);
+    this.recv.to(0);this.stretch.to(0);this.tilt.to(0);this.lean.to(0);this.lookX.to(1.4);this.lookY.to(-1.2);
+    this.at('ev',.36,()=>{this.lean.to(-1.2);this.tilt.to(-4);this.blink.to(.2);this.dim.to(.35);this.sqx.kick(.8);this.sqy.kick(-1)});
+    this.at('ev',.6,()=>{this.tilt.to(0);this.lean.to(0);this.blink.to(.6);this.lookX.to(0);this.lookY.to(.5);this.shakeA.to(5)});
+    this.at('ev',.9,()=>this.shakeA.to(-5));this.at('ev',1.2,()=>this.shakeA.to(3));this.at('ev',1.45,()=>this.shakeA.to(0));
+    this.at('ev',1.6,()=>this.bow.to(.4));
+    this.at('ev',2.25,()=>{this.bow.to(0);this.blink.to(1);this.dim.to(0);this.lookY.to(0);this.fileA.to(0)});
+    if(this.isMain)caption('full',2400);
+  }
+  copy(){this.ripple({col:'#ffffff',dur:1.15,str:.75,size:.4});this.scale.kick(1.4);this.doBlink();this.cheek();if(this.isMain)caption('copy')}
+  newApproval(){
+    this.boost.to(.2);this.tip.to(1);this.sqy.kick(1.2);this.sqx.kick(-.9);this.lookX.to(1.3);this.lookY.to(-.5);
+    this.at('ev',.18,()=>{this.select('approval',{silent:true,replay:true});if(this.isMain)caption('newAppr');this.ripple({col:'#ffbf2e',dur:2,str:.6,size:.5});this.at('st',6,()=>{if(this.state==='approval')this.select('idle',{silent:true})})});
+    this.at('ev',.4,()=>this.tip.to(0));
+    this.at('ev',.95,()=>{this.lookX.to(0);this.lookY.to(0);this.boost.to(0)});
+  }
+
+  // ----- per frame -----
+  step(dt){
+    this.t+=dt;
+    if(this.tasks.length){const due=this.tasks.filter(k=>k.t<=this.t);if(due.length){this.tasks=this.tasks.filter(k=>k.t>this.t);due.sort((a,b)=>a.t-b.t).forEach(k=>k.fn())}}
+    if(reduced())this.springs.forEach(s=>s.snap());else this.springs.forEach(s=>s.step(dt));
+    const t=this.t;
+    this.ripples=this.ripples.filter(r=>t-r.t0<r.dur);this.motes=this.motes.filter(m=>t-m.t0<m.life);this.zs=this.zs.filter(z=>t-z.t0<z.dur);
+    if(this.rim&&t-this.rim.t0>=this.rim.dur)this.rim=null;
+    if(this.trail&&t-this.trail.t0>=this.trail.dur)this.trail=null;
+    if(reduced()){this.ripples=[];this.motes=[];this.zs=[];this.rim=null;this.trail=null}
+    else if(this.open&&t>=this.nextBlink&&this.state!=='resting'&&this.state!=='done'){this.doBlink();if(Math.random()<1/6)this.at('bk',.25,()=>this.doBlink());this.nextBlink=t+rand(3,6)}
+    if(this.isMain&&!reduced()&&choice.bored==='keep'&&this.open&&this.state==='idle'&&!this.isBored&&t-this.idleSince>25)this.bored(true);
+    if(this.loopDone&&this.state==='done'&&t-this.since.done>7.5)this.select('done',{replay:true});
+  }
+  values(){
+    const r=reduced(),M=r?0:1,t=this.t,P=this.pose,w={};
+    for(const s of STATES)w[s]=clamp01(this.W[s].v);
+    let x=0,y=0,a=0,sx=1,sy=1,lx=0,ly=0,eye=1,glow=0,follow=1;
+    const awake=1-w.resting;
+    // shared life: a very slow breath and float, almost still
+    const br=Math.sin(t*1.37)*M*awake;y+=Math.sin(t*1.0)*.9*M*awake*(1-.6*w.working);sx*=1-.008*br;sy*=1+.012*br;
+    // posture-level gaze per intent (kept with Reduce Motion)
+    lx+=-2.2*w.thinking+1.1*w.sending;ly+=-2*w.thinking+.9*w.working;
+    follow-=.6*w.thinking+.6*w.working+.3*w.sending+.85*w.approval+1*w.resting;
+    // resting: deep slow breath
+    const rb=Math.sin(t*1.25)*M*w.resting;sy*=1+.03*rb;sx*=1-.018*rb;glow+=.06*rb;
+    // phrase channels (springs driven by the state timeline)
+    const hm=this.hmm.v;a-=4*hm;y-=hm;ly-=.4*hm;
+    const d=this.dip.v;a+=2.5*d;y+=1.2*d;sy*=1-.035*d;sx*=1+.025*d;
+    const s=this.send.v,tr=SEND[choice.sending];if(s<0){a+=6*s;sy*=1+.04*s;sx*=1-.03*s;x+=2*s}else{a+=8*s;sy*=1+.05*s;sx*=1-.035*s;x+=tr*s}
+    const tp=this.tip.v;y-=3*tp;sy*=1+.04*tp;sx*=1-.025*tp;
+    // events
+    const bw=this.bow.v,st=this.stretch.v;
+    x+=P.x.v+this.lean.v;y+=P.y.v+this.hop.v+bw*7-st*2.5;a+=P.angle.v+this.tilt.v+this.shakeA.v;
+    sx*=P.sx.v*this.sqx.v*this.scale.v*(1+.03*bw)*(1-.035*st);sy*=P.sy.v*this.sqy.v*this.scale.v*(1-.06*bw)*(1+.05*st);ly+=1.3*bw;
+    const[gx,gy]=GAZE[choice.gaze];follow=Math.max(0,follow);
+    let ex=(this.curX.v*follow+this.lookX.v+lx)*gx/3,ey=(this.curY.v*follow+this.lookY.v+ly)*gy/2;
+    const ar=-a*Math.PI/180,cs=Math.cos(ar),sn=Math.sin(ar);[ex,ey]=[ex*cs-ey*sn,ex*sn+ey*cs];
+    if(ey<0)ey*=1.7;const gyv=ey<0?gy*1.7:gy;                    // more room above the eyes than below
+    const n=Math.hypot(ex/gx,ey/gyv);if(n>1){ex/=n;ey/=n}       // eyes can never leave the body
+    const eyeOpen=Math.min(1.3,Math.max(.06,P.eye.v*eye*(1+this.boost.v)*Math.min(this.blink.v,1)));
+    glow=Math.max(0,P.glow.v+glow+this.flare.v-this.dim.v+.2*this.recv.v);
+    const v={x,y,angle:a,sx,sy,ex,ey,eyeOpen,glow,blush:this.blush.v,smile:clamp01(this.smile.v),sleep:clamp01(this.sleep.v),t,r,w};
+    this.lastV=v;return v;
+  }
+  draw(v){
+    const t=v.t,r=v.r,M=r?0:1,Lf=LIGHT[choice.light],PR=this.PR,P=this.pose;
+    const g=Math.min(1.25,v.glow),ab=Math.sin(t*1.1)*M;                       // aura breath, ~5.7 s
+    const fileV=this.fileNow();
+    for(const w of this.views){
+      const tx=160+v.x*3,ty=168+v.y*3,tr=`translate(${tx} ${ty})`;
+      w.pose.setAttribute('transform',`${tr} rotate(${v.angle}) scale(1.4)`);
+      w.back.setAttribute('transform',`${tr} scale(1.4)`);w.front.setAttribute('transform',`${tr} scale(1.4)`);
+      w.shape.setAttribute('transform',`translate(0 ${G}) scale(${v.sx} ${v.sy}) translate(0 ${-G})`);
+      // light pool on the ground: stays put when the grain rises, dims with height
+      const lift=Math.max(0,-this.hop.v),gy0=168+P.y.v*3+116-36*v.w.resting;
+      w.ground.setAttribute('transform',`translate(${160+P.x.v*3} ${gy0}) scale(${1.4*(1-lift*.03)} ${1.4*(1-lift*.03)})`);
+      w.ground.setAttribute('opacity',clamp01(g*.85*Lf*(1-lift*.05)));
+      // aura
+      w.halo.setAttribute('opacity',clamp01(g*Lf*(1+.1*ab)));
+      w.halo.setAttribute('transform',`scale(${(.9+.1*g)*(1+.025*ab)})`);
+      w.halo2.setAttribute('opacity',clamp01(g*.6*Lf*(1-.08*ab)));
+      w.bloom.setAttribute('opacity',clamp01((.3+g*.65)*Lf*(1+.06*ab)));
+      w.rimglow.setAttribute('opacity',clamp01((.55+g*.45)*(.7+.3*Lf)));
+      w.inner.setAttribute('opacity',.3+Math.min(g,1)*.35);
+      w.hl.setAttribute('transform',`translate(${-v.ex*.18} ${-v.ey*.18}) rotate(-30 -22 -52)`);
+      // rim light pass: light sliding over glass
+      if(this.rim){const m=this.rim,k=(t-m.t0)/m.dur,off=-(m.p0+m.span*inOut(k)),o=m.str*Math.pow(bump(k),.7)*Lf;
+        for(const el of[w.rpG,w.rpC]){el.setAttribute('stroke-dasharray',`${m.len} ${100-m.len}`);el.setAttribute('stroke-dashoffset',off)}
+        w.rpG.setAttribute('opacity',o*.9);w.rpC.setAttribute('opacity',o)}
+      else{w.rpG.setAttribute('opacity',0);w.rpC.setAttribute('opacity',0)}
+      // grain-shaped ripples
+      for(let i=0;i<4;i++){const el=w.rip[i],rp=this.ripples[i];
+        if(!rp){el.setAttribute('opacity',0);continue}
+        const k=clamp01((t-rp.t0)/rp.dur);let sc,o;
+        if(rp.inward){sc=1+rp.size*(1-inOut(k));o=rp.str*bump(k)}else{sc=1.04+rp.size*outC(k);o=rp.str*Math.pow(1-k,1.6)*Math.min(1,k*10)}
+        el.setAttribute('transform',`translate(0 -7) scale(${sc}) translate(0 7)`);el.setAttribute('stroke',rp.col);el.setAttribute('stroke-width',3.2/sc);el.setAttribute('opacity',o*Lf)}
+      // eyes, cheeks, happy and sleeping lids
+      const shut=Math.max(v.smile,v.sleep),wide=Math.min(1.12,.9+v.eyeOpen*.1),ery=Math.max(1.6,11*v.eyeOpen),ey0=G+(6-G)*v.sy;
+      [[w.e1,w.c1,w.ch1,w.a[0],w.l[0],-17],[w.e2,w.c2,w.ch2,w.a[1],w.l[1],17]].forEach(([el,cl,ch,arc,lid,cx])=>{
+        const x=cx*v.sx+v.ex,y=ey0+v.ey;
+        el.setAttribute('cx',x);el.setAttribute('cy',y);el.setAttribute('rx',7.5*wide);el.setAttribute('ry',ery);el.setAttribute('opacity',1-shut);
+        cl.setAttribute('cx',x-2.4);cl.setAttribute('cy',y-ery*.38);cl.setAttribute('opacity',v.eyeOpen>.3?1-shut:0);
+        ch.setAttribute('cx',cx*2*v.sx+v.ex*.4);ch.setAttribute('cy',G+(26-G)*v.sy+v.ey*.3);ch.setAttribute('opacity',Math.min(.8,v.blush));
+        arc.setAttribute('d',`M${x-8} ${y+3} Q${x} ${y-9} ${x+8} ${y+3}`);arc.setAttribute('opacity',v.smile);
+        lid.setAttribute('d',`M${x-7.5} ${y+1} Q${x} ${y+4.5} ${x+7.5} ${y+1}`);lid.setAttribute('opacity',v.sleep*(1-v.smile));
+      });
+      const lo=this.lotus.v;if(lo<.01)w.lotus.setAttribute('display','none');else{w.lotus.removeAttribute('display');w.lotus.setAttribute('transform',`translate(${v.ex*.3} ${G+(54-G)*v.sy}) scale(${lo})`);w.lotus.setAttribute('opacity',clamp01(lo))}
+      // ---- quiet props ----
+      // thinking: one round bubble, dot trio breathing in turn (2.4 s)
+      pop(w.think,-58,-75,PR.thinking.v);
+      for(let i=0;i<3;i++){const k=((t*.42)-i*.16)%1,b=r?.6:bump(clamp01(k*2.4));w.td[i].setAttribute('opacity',.3+.7*b);w.td[i].setAttribute('transform',`translate(${-87.5+i*7.5} -92) scale(${1+.22*b}) translate(${87.5-i*7.5} 92)`)}
+      // working: thin progress arc of light orbiting the grain
+      const pw=clamp01(PR.working.v),len=r?28:24+10*Math.sin(t*1.3),off=r?-12:-(t*62)%100;
+      for(const el of[w.arc,w.arcG]){el.setAttribute('stroke-dasharray',`${len} ${100-len}`);el.setAttribute('stroke-dashoffset',off)}
+      w.arc.setAttribute('opacity',pw*.95);w.arcG.setAttribute('opacity',pw*.7*Lf);w.track.setAttribute('opacity',pw*.08);
+      // approval: amber grain-shaped ring that breathes (3.2 s) + round "!" dot
+      const pa=clamp01(PR.approval.v);w.apr.setAttribute('opacity',pa*(r?.6:.45+.25*Math.sin(t*1.95)));
+      w.apr.setAttribute('transform',`translate(0 -7) scale(${1.25+(r?0:.025*Math.sin(t*1.95))}) translate(0 7)`);
+      pop(w.badgeA,60,-80,PR.approval.v*(1+.12*this.tip.v));
+      pop(w.badgeD,60,-80,this.check.v);
+      // resting: one soft z at a time
+      for(let i=0;i<2;i++){const el=w.z[i],z=this.zs[i];
+        if(r&&i===0&&PR.resting.v>.5){el.setAttribute('transform','translate(36 -54) scale(1.2)');el.setAttribute('opacity',.8);continue}
+        if(!z||r){el.setAttribute('opacity',0);continue}
+        const k=(t-z.t0)/z.dur;el.setAttribute('transform',`translate(${30+4*Math.sin(k*3)} ${-36-30*outC(k)}) scale(${(.75+.35*k)*1.2})`);el.setAttribute('opacity',Math.pow(bump(k),.8)*.85*clamp01(PR.resting.v))}
+      // sending: the glow flows out along a gentle curve
+      if(this.trail&&!r){const T=this.trail,k=(t-T.t0)/T.dur,head=outC(Math.min(1,k/.8)),tail=Math.max(head-.34,inOut(clamp01((k-.12)/.88)));
+        w.trail.setAttribute('opacity',Lf);w.trail.setAttribute('transform',`translate(${T.ox} ${T.oy})`);
+        for(const el of[w.trG,w.trC]){el.setAttribute('stroke-dasharray',`${Math.max(0,(head-tail)*100)} 200`);el.setAttribute('stroke-dashoffset',-tail*100)}
+        const pt=w.trG.getPointAtLength(head*w.trailLen),oo=k<.6?1:Math.max(0,(1-k)/.4);
+        for(const el of[w.orb,w.orbG]){el.setAttribute('cx',pt.x);el.setAttribute('cy',pt.y)}w.orb.setAttribute('opacity',oo);w.orbG.setAttribute('opacity',.55*oo)}
+      else if(r&&PR.sending.v>.5){w.trail.setAttribute('opacity',.5);w.trail.setAttribute('transform',`translate(${v.x*3/1.4+46} ${v.y*3/1.4-12})`);
+        for(const el of[w.trG,w.trC]){el.setAttribute('stroke-dasharray','100 200');el.setAttribute('stroke-dashoffset',0)}
+        const pt=w.trG.getPointAtLength(w.trailLen);for(const el of[w.orb,w.orbG]){el.setAttribute('cx',pt.x);el.setAttribute('cy',pt.y)}w.orb.setAttribute('opacity',1);w.orbG.setAttribute('opacity',.55)}
+      else w.trail.setAttribute('opacity',0);
+      // glow motes: few, slow, long-lived
+      for(let i=0;i<6;i++){const el=w.motes[i],m=this.motes[i];
+        if(!m){el.setAttribute('opacity',0);continue}
+        const age=t-m.t0,k=age/m.life;el.setAttribute('cx',m.x+Math.sin(age*1.1+m.ph)*3);el.setAttribute('cy',m.y+m.vy*age);el.setAttribute('r',m.r*(1-.25*k));el.setAttribute('opacity',Math.pow(bump(k),.8)*.85*Lf)}
+      // file tile (drag over / drop / reject)
+      if(fileV&&this.fileA.v>.01){w.file.setAttribute('transform',`translate(${fileV.x} ${fileV.y}) rotate(${fileV.rot}) scale(${fileV.s})`);w.file.setAttribute('opacity',clamp01(fileV.o*this.fileA.v))}
+      else w.file.setAttribute('opacity',0);
+    }
+  }
+}
+
+// ---------- instances ----------
+const stage=$('#stage');
+const bigHost=document.createElement('div');bigHost.className='big';stage.appendChild(bigHost);
+const main=new Mascot([{el:$('#s36'),px:36,clip:true},{el:$('#s52'),px:52,clip:true},{el:bigHost,px:240,clip:false}],true);
+const strip=STATES.map(s=>{
+  const cell=document.createElement('div'),host=document.createElement('div'),lab=document.createElement('span');
+  lab.innerHTML=`${s}<br>${TXT.th[s].replace('…','')}`;cell.append(host,lab);$('#strip').appendChild(cell);
+  const m=new Mascot([{el:host,px:52,clip:true}],false);m.loopDone=true;m.t=rand(0,3);m.select(s,{silent:true});return m;
+});
+const all=[main,...strip];
+
+let capTimer=null;
+function caption(key,ms=1900){
+  if(choice.caption!=='on')return;
+  const el=$('#cap');el.textContent=TXT[choice.lang][key];el.classList.add('on');
+  clearTimeout(capTimer);capTimer=setTimeout(()=>el.classList.remove('on'),ms);
+}
+
+// ---------- loop: stops completely while paused ----------
+let last=performance.now(),raf=0;
+function frame(now){
+  raf=0;const dt=Math.min((now-last)/1000,.05);last=now;
+  if(paused())return;
+  for(const m of all){m.step(dt);m.draw(m.values())}
+  raf=requestAnimationFrame(frame);
+}
+function kick(){if(!raf&&!paused()){last=performance.now();raf=requestAnimationFrame(frame)}}
+$('#pause').onchange=()=>{kick();summary()};
+document.addEventListener('visibilitychange',()=>{last=performance.now()});
+
+// ---------- motions ----------
+const STATE_OF={S1:'idle',S2:'thinking',S3:'working',S4:'sending',S5:'approval',S6:'done',S7:'resting'};
+const DEMO_MS={thinking:7,working:7,sending:8,approval:9,done:6,resting:8};
+function demoState(m,name){
+  m.resetEv();m.select(name,{replay:true});
+  if(name!=='idle')m.at('st',DEMO_MS[name],()=>{if(m.state===name)m.select('idle')});
+}
+const M={
+  A1(m){if(!m.open)m.setOpen(true);m.scale.to(.72);m.sleep.to(1);m.dim.to(.5);
+    m.at('ev',.2,()=>{m.scale.to(1);m.dim.to(0);m.flare.kick(2.5);m.ripple({dur:2,str:.7,size:.55})});
+    m.at('ev',.55,()=>m.sleep.to(m.state==='resting'?1:0));m.at('ev',.95,()=>m.doBlink())},
+  A2(m){if(!m.open)m.setOpen(true);m.scale.to(.88);m.at('ev',.12,()=>m.scale.to(1))},
+  A3(m){m.wai('ev',true)},
+  G1(m){m.ripple({dur:2,str:.7,size:.55});m.rimPass({dur:1.8,str:.8});m.at('ev',.3,()=>{m.mote();m.mote()})},
+  I3(m){m.doBlink()},I4(m){m.doBlink();m.at('ev',.24,()=>m.doBlink())},
+  I5(m){m.bored(true);m.at('ev',2.4,()=>m.bored(false))},
+  P2(m){const path=[-1,1,-1,1,0];path.forEach((p,i)=>m.at('ev',i*.32,()=>{m.curX.to(p*3);m.tilt.to(-p*2.5);m.tilt.kick(-p*8);m.lean.to(p*1.2)}));m.at('ev',1.7,()=>{m.tilt.to(0);m.lean.to(0)})},
+  P3(m){m.lean.to(1.5);m.boost.to(.08);m.at('ev',1.3,()=>{m.lean.to(0);m.boost.to(0)})},
+  P5(m){m.startHover();m.at('ev',3,()=>m.endHover())},
+  C1(m){m.press(1);m.at('ev',.45,()=>m.release(1))},
+  C2(m){m.press(1);m.at('ev',.16,()=>{m.release(1);m.doBlink();m.cheek();m.ripple({dur:1.3,str:.45,size:.3})})},
+  C3(m){for(let i=0;i<4;i++)m.at('ev',i*.24,()=>{m.press(1);m.at('ev',.09,()=>m.release(ampFor(i+1)))})},
+  C4(m){m.sqx.to(1.05);m.sqy.to(.91);m.blink.to(.08);m.at('ev',1.1,()=>m.release(1.5))},
+  C6(m){m.boost.to(.08);m.blush.to(.4);m.at('ev',.9,()=>{m.boost.to(0);m.blush.to(POSES[m.state].blush)})},
+  E1(m){m.dropIn()},E2(m){m.reject()},E3(m){m.copy()},
+  E4(m){m.lookX.to(-.4);m.lookY.to(1.4);m.at('ev',.5,()=>{m.lookX.to(0);m.lookY.to(0)})},
+  E5(m){m.newApproval()},
+  E6(m){m.lookY.to(1.2);m.lookX.to(.5);m.at('ev',.8,()=>{m.lookX.to(0);m.lookY.to(0)})},
+  X1(m){m.setOpen(false)},
+};
+function ampFor(n){return choice.spam==='accumulate'?Math.min(1+.15*(n-1),1.45):1}
+function play(id){
+  main.touch();kick();
+  if(STATE_OF[id]){demoState(main,STATE_OF[id]);return}
+  if(id!=='X1'&&!main.open&&id!=='A1'&&id!=='A2')main.setOpen(true);
+  main.resetEv();M[id](main);
+}
+$('#toggleOpen').onclick=()=>{kick();main.open?M.X1(main):M.A2(main)};
+
+// ---------- pointer + real file drag ----------
+function center(){const r=bigHost.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width}}
+let vx=0,lastPX=null;
+function gazeAt(e){
+  const c=center(),dx=e.clientX-c.x,dy=e.clientY-c.y,range=Math.max(1,stage.clientWidth/2);
+  main.curX.to(Math.max(-3,Math.min(3,dx/range*4.8)));main.curY.to(Math.max(-2,Math.min(2,dy/range*3.2)));return{dx,dy,c};
+}
+stage.addEventListener('pointermove',e=>{
+  if(!main.open)return;main.touch();
+  const{dx,dy,c}=gazeAt(e);
+  if(lastPX!==null)vx=vx*.6+(e.clientX-lastPX)*.4;lastPX=e.clientX;
+  if(!main.file){main.tilt.to(Math.max(-2.5,Math.min(2.5,vx*.15)));
+    const near=Math.hypot(dx,dy)<c.w*.55;main.lean.to(near?Math.max(-1.5,Math.min(1.5,dx/(c.w*.55)*1.5)):0);main.boost.to(near?.08:0)}
+});
+stage.addEventListener('pointerleave',()=>{main.curX.to(0);main.curY.to(0);if(!main.file){main.lean.to(0);main.boost.to(0);main.tilt.to(0)}lastPX=null});
+let holdTimer=null,held=false,clicks=[];
+bigHost.addEventListener('pointerdown',e=>{
+  if(!main.open)return;main.touch();bigHost.setPointerCapture(e.pointerId);held=false;
+  const now=performance.now();clicks=clicks.filter(t=>now-t<1200);clicks.push(now);
+  main.press(ampFor(Math.min(clicks.length,4)));
+  holdTimer=setTimeout(()=>{held=true;main.sqy.to(.91);main.blink.to(.08)},400);
+});
+bigHost.addEventListener('pointerup',()=>{
+  if(!main.open)return;clearTimeout(holdTimer);const n=Math.min(clicks.length,4);
+  if(held)main.release(1.5);else{main.release(ampFor(n));if(n===1){main.doBlink();main.cheek();main.ripple({dur:1.3,str:.45,size:.3})}}
+});
+bigHost.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);main.release(1)});
+let dragDepth=0;
+stage.addEventListener('dragenter',e=>{e.preventDefault();kick();if(dragDepth++===0&&main.open){main.cancel('ev');main.startHover()}});
+stage.addEventListener('dragover',e=>{e.preventDefault();if(main.open)gazeAt(e)});
+stage.addEventListener('dragleave',()=>{if(--dragDepth<=0){dragDepth=0;main.endHover()}});
+stage.addEventListener('drop',e=>{e.preventDefault();dragDepth=0;if(!main.open)return;main.cancel('ev');
+  const n=e.dataTransfer&&e.dataTransfer.files?e.dataTransfer.files.length:1;n>3?main.reject():main.dropIn()});
+
+// ---------- UI ----------
+// [id, name, what it does (TH), intent TH, intent EN]
+const catalog=[
+ ['ท่าตามสถานะ — อ่านจากรูปทรงก่อน',[
+   ['S1','idle · พร้อม','ยืนเอียงนิดๆ เกือบนิ่ง หายใจช้ามาก (≈4.6 วิ) กระพริบตาแบบสุ่ม นานๆ ครั้งมีแสงวิ่งผ่านขอบ หรือจุดแสงลอยออกหนึ่งจุด','มีชีวิต สงบ พร้อมช่วย','Alive, calm, ready'],
+   ['S2','thinking · กำลังคิด','ยืดตัวสูง เอียงซ้ายค้างไว้ ตามองขึ้นซ้ายไปทางฟองคิด ฟองคิดกลมลูกเดียว จุดสามจุดค่อยๆ สว่างทีละจุด บางครั้งเอียงลึกขึ้นช้าๆ เหมือน "อืม…" ออร่าหรี่ลงนิดหนึ่ง','กำลังคิด ยังไม่ลงมือ','Pondering, not acting yet'],
+   ['S3','working · กำลังทำงาน','ย่อตัวกะทัดรัด โน้มไปข้างหน้า ตามองลง พยักเบาๆ เป็นวลีละ 3–5 ครั้งแล้วพัก (ไม่เป็นจังหวะตายตัว) วงแสงบางๆ หมุนรอบตัวแบบ progress ring แสงวิ่งผ่านขอบบ่อยขึ้น','agent กำลังลงมือทำงาน','An agent is busy at work'],
+   ['S4','sending · กำลังส่ง','ท่าประจำคือเอนไปทางขวา ตามองขวา ทุก 3–4 วิ เอนไปหลังเก็บแรง แล้วโน้มไปข้างหน้า แสงของตัวไหลออกไปเป็นเส้นโค้งนุ่มทางขวา ออร่าหรี่ลงครู่หนึ่ง (ให้แสงออกไปแล้ว) ตามองตาม แล้วนิ่งรอ 3–4 วิ','ส่งงานต่อให้ที่อื่น','Handing work off'],
+   ['S5','approval · รออนุมัติ','ยืดตัวตรง ไม่เอียง ตาเบิกมองตรงมาที่คุณ วงแสงสีอำพันรูปเมล็ดข้าวหายใจช้าๆ จุด ! กลมที่ไหล่ ทุก 5–7 วิ เขย่งขึ้นเบาๆ หนึ่งทีพร้อมระลอกแสง','รอคุณ สุภาพ ไม่เร่ง','Waiting for you, politely'],
+   ['S6','done · เสร็จแล้ว','ย่อตัวนิดหนึ่ง ลอยขึ้นเบาๆ พร้อมระลอกแสงหนึ่งวงและเครื่องหมายถูกกลม แล้วค่อยๆ ไหว้ขอบคุณ ตาเป็นโค้งยิ้ม แสงวิ่งผ่านขอบ จากนั้นนิ่งยิ้ม','สำเร็จ ดีใจ ขอบคุณแบบไทย','Success, joy, Thai thanks'],
+   ['S7','resting · ออฟไลน์','ล้มตัวนอนตะแคง หลับตาเป็นเส้นโค้ง หายใจลึกช้า (≈5 วิ) z นุ่มๆ ลอยขึ้นทีละตัว ออร่าและแอ่งแสงหรี่','หลับอยู่ / ออฟไลน์','Asleep or offline']]],
+ ['เปิดแอป / ทักทาย',[
+   ['A1','เปิด island ครั้งแรก','โตขึ้นจากเล็กด้วยสปริงนุ่ม ตาปิดอยู่ ออร่าสว่างขึ้น ระลอกแสงหนึ่งวง แล้วลืมตา กระพริบ','ตื่นขึ้นมาพร้อมช่วย','Wakes up, ready to help'],
+   ['A2','เปิดครั้งต่อไป','โตกลับมาสั้นๆ ไม่ทำพิธี','กลับมาแล้ว ไม่รบกวน','Back, without fuss'],
+   ['A3','ไหว้ทักทาย "สวัสดี"','ก้มตัวลงช้าๆ ตาเป็นโค้งยิ้ม แก้มอุ่น แสงวิ่งผ่านขอบ จุดแสงสองจุดลอยขึ้น แล้วยืดตัว (ดอกบัวตูมเลือกได้)','ทักทายแบบไทย สุภาพ อบอุ่น','A polite, warm Thai greeting']]],
+ ['ภาษาแสงของแบรนด์',[['G1','ลายเซ็นแสง','ระลอกแสงรูปเมล็ดข้าว + แสงวิ่งผ่านขอบ + จุดแสงลอย ชุดเดียวกันที่ทุกท่าใช้ ต่างกันแค่จังหวะและความแรง','แสงอุ่นในที่มืด คือตัวตนของเรา','Warm light in the dark: our signature']]],
+ ['อยู่เฉยๆ',[['I3','กระพริบเอง','ทุก 3–6 วินาทีแบบสุ่ม (ทำงานเองอยู่แล้ว)','มีชีวิต','Alive'],['I4','กระพริบสองครั้งติด','บางครั้ง ~1 ใน 6','เป็นธรรมชาติ ไม่ใช่หุ่นยนต์','Natural, not robotic'],['I5','เบื่อ','เอียงและตาหรี่ครึ่ง หลังไม่มีใครแตะ 25 วินาที','ว่าง ไม่มีอะไรทำ','Nothing to do, a little drowsy']]],
+ ['เมาส์',[['P1','ตามองตามเมาส์','ลองขยับเมาส์ในกรอบดำ ตาไม่หลุดออกนอกตัว','มองคุณอยู่','I see you'],['P2','เมาส์ปัดซ้ายขวาเร็วๆ','ตาตาม ตัวเอียงและเอนตามแบบมีน้ำหนัก','ตามทัน มีน้ำหนัก','Following you, with weight'],['P3','เมาส์เข้าใกล้ตัว','ตัวเอนเข้าหา ตาเบิกนิดหนึ่ง','สนใจคุณ','Curious about you'],['P4','เมาส์ออก / หยุด','ตากลับกลาง (เอาเมาส์ออกจากกรอบ)','กลับไปพัก','Settles back'],['P5','ลากไฟล์ค้างเหนือ notch','ไฟล์ลอยมุมขวาบน ตัวเขย่งยืดขึ้น เอนหา ตาจ้อง ระลอกแสงหดเข้าหาตัว ออร่าสว่างขึ้น (ลากไฟล์จริงมาในกรอบดำก็ได้)','พร้อมรับ ตั้งตารอ','Ready to catch it']]],
+ ['กด / จับตัว',[['C1','กดค้าง แล้วปล่อย','ยุบ ตาหรี่ แล้วเด้งกลับนุ่มๆ','นุ่มเหมือนโมจิ','Soft and squishy'],['C2','คลิกครั้งเดียว','ยุบเล็กน้อย เด้งกลับ กระพริบ แก้มแดง ระลอกแสงเล็ก','รับรู้ว่าคุณแตะ','Acknowledges your tap'],['C3','คลิกรัว 4 ครั้ง','ตามตัวเลือก: สะสมแรง หรือแรงเท่าเดิม','ขี้เล่น','Playful'],['C4','กดค้างนาน','ยุบลึก ตาปิดแน่น ปล่อยแล้วเด้งแรงกว่าปกติ','ถูกบีบ','Being squeezed'],['C6','hover ตัวมัน','ตาเบิกเล็กน้อย แก้มแดงนิดหนึ่ง','ดีใจที่คุณมา','Glad you are here']]],
+ ['เหตุการณ์ใน workspace',[
+   ['E1','วางไฟล์ลง shelf สำเร็จ','ไฟล์ร่อนเข้าตัวแล้วเล็กลงจนหาย ตัวยุบ "อึก" แล้วพองกลับ ตาเป็นโค้งยิ้ม แก้มแดง ระลอกแสงออกหนึ่งวง','รับไว้แล้ว เก็บให้อย่างดี','Taken in, safely kept'],
+   ['E2','shelf เต็ม / ไฟล์ถูกปฏิเสธ','ไฟล์มาชนขอบแล้วไหลออกไปเบาๆ ตัวสะดุ้งเล็กน้อย แสงหรี่ ส่ายหัวช้าๆ แล้วก้มขอโทษนิดหนึ่ง','ปฏิเสธอย่างสุภาพ','A polite "no"'],
+   ['E3','Copy สำเร็จ','เส้นขอบเมล็ดข้าวสีขาวแผ่ขยายออกเหมือนสำเนา ตัวพองนิดหนึ่ง กระพริบตา','คัดลอกเรียบร้อย','Copied'],
+   ['E4','สลับ section','ตาเหลือบไปทางปุ่ม rail','ไปทางนั้นนะ','Follows your navigation'],
+   ['E5','คำขออนุมัติใหม่เข้ามา','ตาเบิก เขย่งขึ้นเล็กน้อย เหลือบไปทางแท็บ Review จุด ! โผล่ วงแสงอำพันจางเข้า แล้วเข้าท่า approval','มีเรื่องใหม่ให้คุณดู','Something new needs you'],
+   ['E6','usage เกิน 90%','ตาเหลือบไปที่การ์ด หนึ่งครั้ง','เตือนเบาๆ','A gentle heads-up']]],
+ ['ปิด / ซ่อน',[['X1','island พับเก็บ','หลับตา หดลง ออร่าหรี่ (ปุ่ม "ปิด island" ด้านซ้ายสลับได้)','ขอตัวเงียบๆ','Bowing out quietly']]],
+];
+const cat=$('#catalog');
+for(const[title,items]of catalog){
+  const g=document.createElement('div');g.className='group';g.innerHTML=`<h2>${title}</h2>`;
+  for(const[id,name,desc,ith,ien]of items){
+    keep[id]=true;
+    const row=document.createElement('div');row.className='item';
+    const playable=M[id]||STATE_OF[id];
+    row.innerHTML=`<input type="checkbox" autocomplete="off" checked aria-label="เก็บ ${id}"><div><code>${id}</code><b>${name}</b><small>${desc}</small><small class="intent">เจตนา: ${ith} · Intent: ${ien}</small></div>${playable?'<button class="play">Play</button>':'<span class="state">ลองเอง</span>'}`;
+    row.querySelector('input').onchange=e=>{keep[id]=e.target.checked;row.classList.toggle('off',!e.target.checked);summary()};
+    const b=row.querySelector('button');if(b)b.onclick=()=>play(id);
+    g.appendChild(row);
+  }
+  cat.appendChild(g);
+}
+const statesEl=$('#states');
+for(const s of STATES){
+  const l=document.createElement('label');l.innerHTML=`<input type="radio" autocomplete="off" name="st" value="${s}"${s==='idle'?' checked':''}>${s}`;
+  l.querySelector('input').onchange=()=>{main.touch();kick();main.resetEv();main.select(s)};statesEl.appendChild(l);
+}
+document.querySelectorAll('input[name=lang]').forEach(i=>i.onchange=()=>{choice.lang=i.value;main.select(main.state,{silent:true});caption(main.state);summary()});
+const defs=[
+ ['spring','ความนุ่มของสปริง (ตอนกด / วางไฟล์) · Spring feel',[['calm','นิ่งสุขุม · calm'],['soft','นุ่ม เด้งนิดๆ · soft'],['jelly','เด้งกว่า · jelly']]],
+ ['light','ความแรงของแสง · Light intensity',[['subtle','บางเบา · subtle'],['normal','ปกติ · normal']]],
+ ['motes','จุดแสงลอย · Glow motes',[['off','ไม่เอา · off'],['few','มีเล็กน้อย · few']]],
+ ['lotus','ดอกบัวตูมตอนไหว้ · Lotus bud during the wai',[['off','ไหว้อย่างเดียว · bow only'],['on','มีดอกบัวตูม · with lotus bud']]],
+ ['caption','คำพูดสั้นๆ ข้างตัว (ไทย/อังกฤษตามปุ่มมุมขวาบน) · Captions',[['on','แสดง · on'],['off','ไม่แสดง · off']]],
+ ['gaze','ระยะที่ตามองตามเมาส์ · Gaze range',[['subtle','น้อย · subtle'],['normal','ปกติ · normal'],['big','มาก · big']]],
+ ['sending','ระยะโน้มตัวไปข้างหน้าตอนส่ง (S4) · Sending lean',[['0','ไม่เลื่อน · none'],['3','เล็กน้อย · small'],['6','มากขึ้น · more']]],
+ ['spam','คลิกรัวๆ (C3) · Click spam',[['accumulate','สะสมแรงขึ้น · builds up'],['constant','แรงเท่าเดิม · constant']]],
+ ['bored','ท่าเบื่อหลัง 25 วินาที (I5) · Bored pose',[['keep','เก็บไว้ · keep'],['drop','เอาออก · drop']]],
+ ['usage','ตาเหลือบดูการ์ดเมื่อ usage เกิน 90% (E6) · Usage glance',[['keep','เก็บไว้ · keep'],['drop','ไม่ต้องทำ · drop']]],
+];
+const chEl=$('#choices');
+for(const[key,q,opts]of defs){
+  const d=document.createElement('div');d.className='choice';
+  d.innerHTML=`<div class="q">${q}</div><div class="opts">${opts.map(([v,t])=>`<label><input type="radio" autocomplete="off" name="c_${key}" value="${v}"${choice[key]===v?' checked':''}>${t}</label>`).join('')}</div>`;
+  d.querySelectorAll('input').forEach(i=>i.onchange=()=>{
+    choice[key]=i.value;kick();
+    if(key==='spring'){all.forEach(m=>m.applySpring());main.resetEv();M.C2(main)}
+    if(key==='light'||key==='motes'){main.resetEv();M.G1(main)}
+    if(key==='lotus'){main.resetEv();M.A3(main)}
+    if(key==='caption')caption('wai');
+    if(key==='sending')demoState(main,'sending');
+    if(key==='bored'&&i.value==='drop')main.bored(false);
+    summary()});
+  chEl.appendChild(d);
+}
+function summary(){
+  const dropped=Object.keys(keep).filter(k=>!keep[k]);
+  $('#out').value=
+`Rice motion v4 (calm / premium) — ตัวเลือกของเจ้าของ
+spring feel: ${choice.spring}
+light intensity: ${choice.light}
+glow motes: ${choice.motes}
+wai lotus bud: ${choice.lotus}
+caption: ${choice.caption} (ภาษา ${choice.lang})
+gaze range: ${choice.gaze}
+sending lean (S4): ${choice.sending}
+click spam (C3): ${choice.spam}
+bored (I5): ${choice.bored}
+usage glance (E6): ${choice.usage}
+รายการที่ไม่เอา: ${dropped.length?dropped.join(', '):'(ไม่มี เอาทั้งหมด)'}
+Reduce Motion ทดสอบแล้ว: ${reduced()?'ใช่':'ยังไม่ได้ลอง'}`;
+}
+$('#reduced').onchange=()=>{kick();summary()};
+$('#copy').onclick=async()=>{const t=$('#out');t.select();try{await navigator.clipboard.writeText(t.value)}catch{document.execCommand('copy')}};
+function init(){
+  document.querySelectorAll('#choices input').forEach(i=>{i.checked=choice[i.name.slice(2)]===i.value});
+  document.querySelectorAll('input[name=lang]').forEach(i=>i.checked=i.value===choice.lang);
+  $('#reduced').checked=false;$('#pause').checked=false;
+  all.forEach(m=>m.applySpring());summary();
+}
+main.select('idle',{silent:true});init();window.addEventListener('load',init);
+window.lab={main,strip,M,choice,play};
+kick();
+</script>
+</body>
+</html>

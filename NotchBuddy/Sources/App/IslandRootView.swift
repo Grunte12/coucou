@@ -41,8 +41,24 @@ struct IslandContainer: View {
     /// Pixels the content must be pushed down to clear the concave ear transparent area.
     /// = 0 in expanded mode (no ears), = earRadius in compact/notch mode.
     private var earOffset: CGFloat { max(0, -islandTopRadius) }
-    /// Mochi stays on screen in the agent workspace; the host owns the companion.
-    private var hubOwnsCompanion: Bool { false }
+    /// In the expanded agent workspace the rice mascot in the gutter is the
+    /// companion, so Mochi steps aside there. Everywhere else Mochi stays.
+    /// No per-agent mini characters in the Seed build.
+    private var hubOwnsSeed: Bool {
+        #if COUCOU_HUB
+        return true
+        #else
+        return false
+        #endif
+    }
+
+    private var hubOwnsCompanion: Bool {
+        #if COUCOU_HUB
+        return state.mode == .expanded && state.view == .linkHub
+        #else
+        return false
+        #endif
+    }
 
     var body: some View {
         // Canvas active during drag-over (.upload), post-drop animation (.uploading),
@@ -96,7 +112,14 @@ struct IslandContainer: View {
             // Single BotPlacement — always alive in the view tree so spring animations
             // fire from the current position (e.g. choose at 60,101) when canvas deactivates.
             // Hidden during upload canvas or greeting (both draw their own Mochi).
-            BotPlacement(state: state, islandW: islandWidth, islandH: islandHeight)
+            Group {
+                #if COUCOU_HUB
+                // Seed is the only character: no Mochi anywhere in this build.
+                SeedPlacement(state: state, islandW: islandWidth, islandH: islandHeight)
+                #else
+                BotPlacement(state: state, islandW: islandWidth, islandH: islandHeight)
+                #endif
+            }
                 // Keep idle animations inside the resting strip. Expanded views
                 // retain the panel's full height for particles and hands.
                 .mask(alignment: .topLeading) {
@@ -104,12 +127,12 @@ struct IslandContainer: View {
                                       height: state.mode == .expanded ? 320 : islandHeight)
                 }
                 .opacity(uploadActive || greetingActive || hubOwnsCompanion ? 0 : 1)
-                .animation(.easeInOut(duration: 0.25), value: uploadActive || greetingActive)
+                .animation(.easeInOut(duration: 0.25), value: uploadActive || greetingActive || hubOwnsCompanion)
 
             CountdownBar(state: state, islandW: islandWidth)
 
             Group {
-                if state.mode == .compact {
+                if state.mode == .compact && !hubOwnsSeed {
                     CompactMiniGrid(state: state)
                         .scaleEffect(IslandRestingLayout(width: islandWidth, height: islandHeight).miniGridScale)
                         .position(x: islandWidth - 40, y: islandHeight / 2)
@@ -389,7 +412,11 @@ struct CountdownBar: View {
     var body: some View {
         GeometryReader { _ in
             Rectangle()
+                #if COUCOU_HUB
+                .fill(SeedInk.gold.opacity(0.4))
+                #else
                 .fill(Color.white.opacity(0.35))
+                #endif
                 .frame(width: barWidth, height: 2)
                 .cornerRadius(2)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
@@ -496,6 +523,7 @@ struct IslandHeader: View {
                 #else
                 TabButton(icon: "house.fill", view: .overview, state: state)
                 #endif
+                #if !COUCOU_HUB
                 TabButton(icon: "bubble.left.fill", view: .prompt, state: state, preAction: {
                     #if !APPSTORE
                     if state.promptContext == nil {
@@ -504,6 +532,7 @@ struct IslandHeader: View {
                     #endif
                 })
                 TabButton(icon: "plus", view: .upload, state: state)
+                #endif
             }
             .padding(.leading, 14)
 
@@ -518,9 +547,14 @@ struct IslandHeader: View {
                 #endif
                 HStack(spacing: 14) {
                     Button(action: {
+                        #if COUCOU_HUB
+                        // Seed's Settings live in their own window.
+                        NotificationCenter.default.post(name: .openFullSettings, object: nil)
+                        #else
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             state.view = .settings
                         }
+                        #endif
                     }) {
                         Image(systemName: state.view == .settings ? "gearshape.fill" : "gearshape")
                             .font(.system(size: 14))

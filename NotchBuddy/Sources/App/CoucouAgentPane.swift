@@ -8,12 +8,12 @@ import AppKit
 // shared `HubIslandModel`; it never claims an inbox, sends, or routes.
 
 enum CoucouHubTab: String, CaseIterable {
-    case agents, trail, mcp, review
+    case agents, timeline, mcp, review
 
     var title: String {
         switch self {
         case .agents: return "Agents"
-        case .trail:  return "Trail"
+        case .timeline: return "Timeline"
         case .mcp:    return "MCP"
         case .review: return "Review"
         }
@@ -21,7 +21,7 @@ enum CoucouHubTab: String, CaseIterable {
     var icon: String {
         switch self {
         case .agents: return "person.2.fill"
-        case .trail:  return "point.3.connected.trianglepath.dotted"
+        case .timeline: return "point.3.connected.trianglepath.dotted"
         case .mcp:    return "server.rack"
         case .review: return "hand.raised.fill"
         }
@@ -41,16 +41,25 @@ struct CoucouAgentWorkspace: View {
     let onClose: () -> Void
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @ObservedObject private var shelf = CoucouHubIntegration.shared.workspace
+    @ObservedObject private var rice = RiceMotionHolder.shared
     @State private var tab: CoucouHubTab = .agents
+    @State private var section: CoucouWorkspaceSection = .agents
     @State private var selectedAgentID: String?
-    @State private var trailAgentID: String?
+    @State private var timelineAgentID: String?
     @State private var showAllAgents = false
-    @State private var seenIDs: Set<String> = []
+    @State private var showAgentFacts = false
+    @ObservedObject private var ring = SeedRingStore.shared
+    @State private var ringOpen = false
+    @State private var ringBloomed = false
+    @State private var ringHighlight: Int?
+    @State private var editingRing = false
+    @State private var seenTransfers: [String: HubTincanTraceSummary] = [:]
     @State private var freshIDs: Set<String> = []
     @State private var baselined = false
 
-    private var transferIDs: [String] {
-        model.tincanInbox.map { CoucouHubFormat.transfers($0).map(\.requestID) } ?? []
+    private var transfers: [HubTincanTraceSummary] {
+        model.tincanInbox.map { CoucouHubFormat.transfers($0) } ?? []
     }
 
     private func spring(_ response: Double = 0.3, _ damping: Double = 0.8) -> Animation? {
@@ -63,23 +72,36 @@ struct CoucouAgentWorkspace: View {
             // The host owns the notch size. Intrinsic text/button sizes must
             // never enlarge it when the selected agent changes.
             GeometryReader { bounds in
-              VStack(alignment: .leading, spacing: 8) {
-                header
-                if model.canPair || model.connection == .awaitingApproval || model.pairing != nil {
-                    pairingStrip
-                }
-                // Fixed-height body: tab changes never move the header anchors.
-                Group {
-                    switch tab {
-                    case .agents: agentsPage
-                    case .trail:  trailPage
-                    case .mcp:    mcpPage
-                    case .review: reviewPage
+              VStack(alignment: .leading, spacing: CoucouWorkspaceStyle.sectionGap) {
+                if editingRing {
+                    SeedRingEditor(store: ring) {
+                        withAnimation(spring()) { editingRing = false }
                     }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .transition(.opacity)
+                } else if section == .agents {
+                    header
+                    if model.canPair || model.connection == .awaitingApproval || model.pairing != nil {
+                        pairingStrip
+                    }
+                    // Fixed-height body: tab changes never move the header anchors.
+                    Group {
+                        switch tab {
+                        case .agents: agentsPage
+                        case .timeline: timelinePage
+                        case .mcp:    mcpPage
+                        case .review: reviewPage
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .id(tab)
+                    .transition(.opacity)
+                } else {
+                    sectionPage
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        .id(section)
+                        .transition(.opacity)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .id(tab)
-                .transition(.opacity)
               }
               .frame(width: max(0, bounds.size.width - 100),
                      height: max(0, bounds.size.height - 24), alignment: .topLeading)
@@ -87,23 +109,76 @@ struct CoucouAgentWorkspace: View {
               .padding(.trailing, 16)
               .padding(.vertical, 12)
             }
+            // Gutter: the companion sits above, the rail below. Both stay put
+            // when the section changes. The rice mascot is centred where Mochi
+            // sat (pane-local 44, 42); its glow may spill under the rail.
+            CoucouWorkspaceRail(selection: section,
+                                shelfCount: shelf.files.count,
+                                onSelect: selectSection)
+                .padding(.leading, 29)
+                .padding(.top, 78)
+                .frame(maxHeight: .infinity, alignment: .top)
+            // Action Ring: everything but Seed dims; the pane owns pointing and picking.
+            if ringOpen {
+                Color.black.opacity(ringBloomed ? 0.55 : 0)
+                    .animation(.easeOut(duration: 0.18), value: ringBloomed)
+                    .contentShape(Rectangle())
+                    .gesture(DragGesture(minimumDistance: 0)
+                        .onChanged { v in pointRing(at: v.location) }
+                        .onEnded { v in releaseRing(at: v.location, moved: hypot(v.translation.width, v.translation.height) > 4) })
+            }
+            // The notch keeps this pane alive behind a hook card; its Seed only
+            // reacts (and draws) while the workspace is the view on screen.
+            CoucouRiceCompanion(holder: rice, state: state, section: section,
+                                onTap: toggleRing, onFlick: flickRing,
+                                reacts: state.mode == .expanded && state.view == .linkHub)
+                .padding(.leading, 2)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                .allowsHitTesting(!ringOpen)
+            if ringOpen {
+                SeedActionRing(center: Self.seedCentre, slots: ring.slots, highlighted: ringHighlight,
+                               bloomed: ringBloomed,
+                               badges: [.review: model.attentionRequestCount, .shelf: shelf.files.count],
+                               onCustomize: customizeRing)
+            }
         }
-        .onExitCommand(perform: onClose)
+        .onExitCommand { ringOpen ? closeRing() : onClose() }
+        // Gaze only: no state change, so the pane never re-renders on hover.
+        .onContinuousHover(coordinateSpace: .local) { phase in
+            switch phase {
+            case .active(let location):
+                if ringOpen { pointRing(at: location) } else { rice.pointer(location, centre: Self.seedCentre) }
+            case .ended: if !ringOpen { rice.pointer(nil, centre: .zero) }
+            }
+        }
+        #if COUCOU_LAB
+        // Lab: synthetic moves never reach hover tracking, so the lab feeds the same handler.
+        .onReceive(NotificationCenter.default.publisher(for: .seedLabPointer)) { note in
+            let p = (note.object as? NSValue)?.pointValue
+            if ringOpen, let p { pointRing(at: p) } else { rice.pointer(p, centre: Self.seedCentre) }
+        }
+        #endif
+        .onReceive(NotificationCenter.default.publisher(for: .coucouWorkspaceShowSection)) { note in
+            if let next = note.object as? CoucouWorkspaceSection, next != section { section = next }
+        }
         .onAppear(perform: observeTransfers)
-        .onChange(of: transferIDs) { _, _ in observeTransfers() }
+        .onChange(of: transfers) { _, _ in observeTransfers() }
     }
 
     /// Newly observed IDs get a single highlight. The first read is a baseline
     /// so history is never replayed on launch or on tab/panel changes.
     private func observeTransfers() {
-        let ids = Set(transferIDs)
+        guard model.tincanInbox?.status == .ready else { return }
+        let current = transfers
         guard baselined else {
-            if model.tincanInbox != nil { seenIDs = ids; baselined = true }
+            seenTransfers = Dictionary(uniqueKeysWithValues: current.map { ($0.requestID, $0) })
+            baselined = true
             return
         }
-        let fresh = ids.subtracting(seenIDs)
-        seenIDs.formUnion(ids)
+        let fresh = CoucouHubFormat.changedTransfers(previous: seenTransfers, current: current)
+        for entry in current { seenTransfers[entry.requestID] = entry }
         guard !fresh.isEmpty else { return }
+        NotificationCenter.default.post(name: .seedGlance, object: nil)
         withAnimation(spring(0.4, 0.75)) { freshIDs.formUnion(fresh) }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.8) {
             withAnimation(spring(0.4, 0.9)) { freshIDs.subtract(fresh) }
@@ -113,7 +188,136 @@ struct CoucouAgentWorkspace: View {
     private func select(_ next: CoucouHubTab) {
         guard next != tab else { return }
         SoundEngine.shared.play("tick")
+        SeedReaction.notice(dx: 1, dy: -0.25)
         withAnimation(spring()) { tab = next }
+    }
+
+    // MARK: Action Ring
+
+    /// Seed's centre in pane coordinates; the ring blooms around it.
+    static let seedCentre = CGPoint(x: 44, y: 42)
+
+    private func toggleRing() { ringOpen ? closeRing() : openRing() }
+
+    private func openRing() {
+        guard !ringOpen else { return }
+        SoundEngine.shared.play("open")
+        rice.motion.ringOpen()
+        editingRing = false
+        ring.reload()
+        ringHighlight = nil
+        ringOpen = true
+        // Next frame: the slots fly out from Seed.
+        DispatchQueue.main.async { ringBloomed = true }
+    }
+
+    private func foldRing() {
+        ringBloomed = false
+        ringHighlight = nil
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.22) { if !ringBloomed { ringOpen = false } }
+    }
+
+    private func closeRing() {
+        guard ringOpen else { return }
+        SoundEngine.shared.play("close")
+        rice.motion.ringClose()
+        foldRing()
+    }
+
+    /// The slot in the pointer's direction lights up and Seed looks at it.
+    private func pointRing(at location: CGPoint) {
+        let v = CGSize(width: location.x - Self.seedCentre.x, height: location.y - Self.seedCentre.y)
+        let next = SeedRingGeometry.slot(for: v, count: ring.slots.count)
+        guard next != ringHighlight else { return }
+        ringHighlight = next
+        if let next {
+            SoundEngine.shared.play("hover")
+            let o = SeedRingGeometry.offset(index: next, count: ring.slots.count)
+            rice.motion.lookAt(dx: o.width, dy: o.height)
+        }
+    }
+
+    /// Click or release: on Seed closes, toward a slot picks it, elsewhere closes.
+    private func releaseRing(at location: CGPoint, moved: Bool) {
+        let v = CGSize(width: location.x - Self.seedCentre.x, height: location.y - Self.seedCentre.y)
+        if !moved && hypot(v.width, v.height) < 22 { closeRing(); return }
+        if let i = SeedRingGeometry.slot(for: v, count: ring.slots.count),
+           hypot(v.width, v.height) < SeedRingGeometry.radius * 1.9 {
+            pick(i)
+        } else {
+            closeRing()
+        }
+    }
+
+    /// Press Seed and drag toward a slot: the ring opens on the way, the release picks.
+    private func flickRing(_ translation: CGSize, ended: Bool) {
+        if !ringOpen { openRing() }
+        let p = CGPoint(x: Self.seedCentre.x + translation.width, y: Self.seedCentre.y + translation.height)
+        if ended {
+            if let i = SeedRingGeometry.slot(for: translation, count: ring.slots.count) { pick(i) } else { closeRing() }
+        } else {
+            pointRing(at: p)
+        }
+    }
+
+    private func pick(_ index: Int) {
+        guard ring.slots.indices.contains(index) else { return }
+        let action = ring.slots[index]
+        SoundEngine.shared.play("pop")
+        rice.motion.ringPick()
+        foldRing()
+        perform(action)
+    }
+
+    private func customizeRing() {
+        SoundEngine.shared.play("open")
+        rice.motion.ringClose()
+        foldRing()
+        withAnimation(spring()) { editingRing = true }
+    }
+
+    private func perform(_ action: SeedAction) {
+        editingRing = false
+        switch action {
+        case .agents:    show(.agents)
+        case .timeline:  show(.timeline)
+        case .review:    show(.review)
+        case .mcp:       show(.mcp)
+        case .shelf:     selectSection(.shelf)
+        case .clipboard: selectSection(.clipboard)
+        case .usage:     selectSection(.usage)
+        case .folders:   selectSection(.folders)
+        case .refresh:   model.refresh(); model.refreshOperatorTasks()
+        case .manager:   onOpenConsole()
+        case .sound:     state.soundEnabled.toggle()
+        case .settings:  NotificationCenter.default.post(name: .openFullSettings, object: nil)
+        }
+    }
+
+    private func show(_ next: CoucouHubTab) {
+        if section != .agents { withAnimation(spring()) { section = .agents } }
+        if next != tab { withAnimation(spring()) { tab = next } }
+    }
+
+    private func selectSection(_ next: CoucouWorkspaceSection) {
+        guard next != section else { return }
+        SoundEngine.shared.play("tick")
+        withAnimation(spring()) { section = next }
+    }
+
+    @ViewBuilder private var sectionPage: some View {
+        switch section {
+        case .agents:
+            EmptyView()
+        case .shelf:
+            CoucouShelfPane(integration: CoucouHubIntegration.shared, state: state, onClose: onClose)
+        case .clipboard:
+            CoucouClipboardPane(state: state, clipboard: CoucouHubIntegration.shared.clipboard, onClose: onClose)
+        case .usage:
+            CoucouUsagePane(state: state, onOpenSettings: { NotificationCenter.default.post(name: .openFullSettings, object: "agents") }, onClose: onClose)
+        case .folders:
+            SeedFoldersPane(state: state, onClose: onClose)
+        }
     }
 
     // MARK: Header
@@ -156,7 +360,7 @@ struct CoucouAgentWorkspace: View {
 
     private func tabButton(_ t: CoucouHubTab) -> some View {
         let on = tab == t
-        let badge = t == .review ? model.heldRequestCount : 0
+        let badge = t == .review ? model.attentionRequestCount : 0
         return Button { select(t) } label: {
             HStack(spacing: 5) {
                 Image(systemName: t.icon).font(.system(size: 10.5))
@@ -270,7 +474,18 @@ struct CoucouAgentWorkspace: View {
 
     @ViewBuilder private var agentsPage: some View {
         if let gate = tincanGate {
-            notice(gate.0, gate.1, symbol: "person.2")
+            VStack(alignment: .leading, spacing: 8) {
+                notice(gate.0, gate.1, symbol: "person.2")
+                if model.tincanAccess != .notChecked {
+                    Button("Agent settings") {
+                        NotificationCenter.default.post(name: .openFullSettings, object: "agents")
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(Color(hex: "#F5C542"))
+                    .padding(.leading, 22)
+                }
+            }
         } else if let roster = model.tincanRoster {
             rosterContent(roster)
         } else {
@@ -289,26 +504,21 @@ struct CoucouAgentWorkspace: View {
             let rows = visible.map { AgentRow(agent: $0, task: task(for: $0)) }
             let selected = roster.agents.first { $0.id == selectedAgentID } ?? visible.first
             GeometryReader { bounds in
-              HStack(alignment: .top, spacing: 10) {
+              HStack(alignment: .top, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     ScrollView(.vertical, showsIndicators: false) {
-                        LazyVGrid(columns: [GridItem(.flexible(minimum: 0), spacing: 4), GridItem(.flexible(minimum: 0), spacing: 4)], spacing: 4) {
+                        LazyVGrid(columns: [GridItem(.flexible(minimum: 0))], spacing: 6) {
                             ForEach(rows) { row in
-                                AgentPill(task: row.task, state: state, swapping: .constant(false)) {
+                                SeedAgentRow(name: row.task.name, colorHex: row.task.color,
+                                             online: row.agent.online, held: heldInvolving(row.id),
+                                             selected: selected?.id == row.id) {
                                     SoundEngine.shared.play("blip")
+                                    SeedReaction.notice(dx: 1, dy: 0.4)
                                     withAnimation(spring()) { selectedAgentID = row.id }
                                 }
-                                .overlay(
-                                    Capsule()
-                                        .stroke(Color(hex: row.task.color).opacity(selected?.id == row.id ? 0.9 : 0), lineWidth: 1.5)
-                                        .allowsHitTesting(false)
-                                )
-                                .opacity(row.agent.online ? 1 : 0.55)
-                                .accessibilityLabel("\(row.task.name), \(row.agent.online ? "online" : "offline")")
-                                .accessibilityAddTraits(selected?.id == row.id ? .isSelected : [])
                             }
                         }
-                        .padding(.vertical, 4)
+                        .padding(.vertical, 2)
                     }
                     if !hidden.isEmpty {
                         Button {
@@ -322,10 +532,10 @@ struct CoucouAgentWorkspace: View {
                         .buttonStyle(.plain)
                     }
                 }
-                .frame(width: 236, height: bounds.size.height, alignment: .topLeading)
+                .frame(width: 196, height: bounds.size.height, alignment: .topLeading)
                 if let selected {
                     agentDetail(selected)
-                        .frame(width: max(0, bounds.size.width - 246),
+                        .frame(width: max(0, bounds.size.width - 208),
                                height: bounds.size.height, alignment: .topLeading)
                 }
               }
@@ -366,42 +576,74 @@ struct CoucouAgentWorkspace: View {
                 Text(agent.id).font(.system(size: 10, design: .monospaced)).foregroundColor(Color(hex: "#6B7079"))
                     .lineLimit(1).truncationMode(.middle)
             }
-            factRow("Wake", wakeText(agent), warn: wakeMissing)
-            factRow("Last active", CoucouHubFormat.relative(agent.lastActive))
-            factRow("Queue", "\(agent.queued) queued · \(agent.claimed) claimed")
-            if let kind = agent.kind, !kind.isEmpty {
-                factRow("Kind", CoucouHubFormat.bounded(kind, limit: 28) + (agent.version.map { " · v\(CoucouHubFormat.bounded($0, limit: 12))" } ?? ""))
+            // One readable summary line; the full facts sit behind Details.
+            if !showAgentFacts {
+                Text(agentSummary(agent))
+                    .font(.system(size: 11)).foregroundColor(Color(hex: wakeMissing ? "#F5A524" : "#C5C8CD"))
+                    .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+            } else {
+                VStack(alignment: .leading, spacing: 5) {
+                    factRow("Wake", wakeText(agent), warn: wakeMissing)
+                    factRow("Last active", CoucouHubFormat.relative(agent.lastActive))
+                    factRow("Queue", "\(agent.queued) queued · \(agent.claimed) claimed")
+                    if let kind = agent.kind, !kind.isEmpty {
+                        factRow("Kind", CoucouHubFormat.bounded(kind, limit: 28) + (agent.version.map { " · v\(CoucouHubFormat.bounded($0, limit: 12))" } ?? ""))
+                    }
+                    Text(wakeMissing || !agent.online
+                         ? "Presence is not proof a task is running. Waking an agent from here isn’t available yet."
+                         : "Presence is not proof a task is running.")
+                        .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079"))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .padding(.top, 2)
+                .transition(.opacity)
             }
-            Text("Presence is not proof a task is running.")
-                .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079"))
             Spacer(minLength: 0)
-            HStack(spacing: 6) {
-                SecondaryButton("Trail") {
-                    trailAgentID = agent.id
-                    select(.trail)
+            HStack(spacing: 8) {
+                SecondaryButton("Timeline") {
+                    timelineAgentID = agent.id
+                    select(.timeline)
                 }
                 if wakeMissing || !agent.online {
                     SecondaryButton("Set up", action: onOpenConsole)
                         .help("Opens the existing Manager. No keys are shown here.")
                 }
-                SecondaryButton("Wake") {}
-                    .disabled(true).opacity(0.4)
-                    .help("The Hub has no wake action yet.")
+                Spacer(minLength: 0)
+                Button {
+                    withAnimation(spring()) { showAgentFacts.toggle() }
+                } label: {
+                    HStack(spacing: 3) {
+                        Text("Details")
+                        Image(systemName: "chevron.down").font(.system(size: 8.5, weight: .bold))
+                            .rotationEffect(.degrees(showAgentFacts ? 180 : 0))
+                    }
+                    .font(.system(size: 10.5, weight: .medium)).foregroundColor(Color(hex: "#8E939C"))
+                    .padding(.horizontal, 6).frame(height: 24).contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(showAgentFacts ? "Hide details" : "Show details")
             }
-            if wakeMissing || !agent.online {
-                Text("Wake from here isn’t available yet; the Hub has no such action.")
-                    .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079"))
-                    .fixedSize(horizontal: false, vertical: true)
             }
-            }
-            .frame(maxWidth: .infinity, minHeight: max(0, bounds.size.height - 20), alignment: .topLeading)
-            .padding(10)
+            .frame(maxWidth: .infinity, minHeight: max(0, bounds.size.height - 24), alignment: .topLeading)
+            .padding(12)
           }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(RoundedRectangle(cornerRadius: 14).fill(Color(hex: "#0E0F11")))
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.white.opacity(0.05), lineWidth: 1))
         .clipShape(RoundedRectangle(cornerRadius: 14))
+    }
+
+    /// "Hook · active 2 min ago · 1 working" — the few facts worth reading at a glance.
+    private func agentSummary(_ agent: HubTincanAgent) -> String {
+        var parts: [String] = []
+        let wake = wakeText(agent)
+        parts.append(wake == "Not configured" ? "Wake not set up" : wake)
+        let seen = CoucouHubFormat.relative(agent.lastActive)
+        if seen != "—" { parts.append(agent.online ? "active \(seen)" : "last seen \(seen)") }
+        if agent.claimed > 0 { parts.append("\(agent.claimed) working") }
+        if agent.queued > 0 { parts.append("\(agent.queued) queued") }
+        return parts.joined(separator: " · ")
     }
 
     private func factRow(_ key: String, _ value: String, warn: Bool = false) -> some View {
@@ -414,59 +656,24 @@ struct CoucouAgentWorkspace: View {
         }
     }
 
-    // MARK: Trail page
+    // MARK: Timeline page
 
-    @ViewBuilder private var trailPage: some View {
+    @ViewBuilder private var timelinePage: some View {
         if model.selectedTincanTask != nil {
             transferDetail
         } else if let gate = tincanGate {
             notice(gate.0, gate.1, symbol: "point.3.connected.trianglepath.dotted")
         } else if let inbox = model.tincanInbox {
             let all = CoucouHubFormat.transfers(inbox)
-            let rows = all.filter { trailAgentID == nil || $0.sender == trailAgentID || $0.recipient == trailAgentID }
-            let shown = Array(rows.prefix(8))
-            VStack(alignment: .leading, spacing: 5) {
-                HStack(spacing: 6) {
-                    Text("Who is talking to whom. Open a transfer to read it.")
-                        .font(.system(size: 10.5)).foregroundColor(Color(hex: "#6B7079")).lineLimit(1)
-                    Spacer(minLength: 2)
-                    if let trailAgentID {
-                        Button {
-                            withAnimation(spring()) { self.trailAgentID = nil }
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text(CoucouHubFormat.display(trailAgentID)).lineLimit(1)
-                                Image(systemName: "xmark").font(.system(size: 8, weight: .bold))
-                            }
-                            .font(.system(size: 10.5, weight: .medium)).foregroundColor(Color(hex: "#F5F6F8"))
-                            .padding(.horizontal, 8).frame(height: 20)
-                            .background(Color.white.opacity(0.09), in: Capsule())
-                        }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("Clear agent filter")
-                    }
-                }
-                if shown.isEmpty {
-                    notice(trailAgentID == nil ? "Quiet" : "Nothing for this agent",
-                           "No recent transfers in the Hub snapshot. Older history is not shown here.",
-                           symbol: "moon.zzz")
-                } else {
-                    ScrollView(.vertical, showsIndicators: false) {
-                        VStack(spacing: 3) {
-                            ForEach(shown, id: \.requestID) { entry in
-                                transferRow(entry, held: inbox.held.contains { $0.requestID == entry.requestID })
-                                    .transition(reduceMotion ? .identity
-                                                : .asymmetric(insertion: .move(edge: .top).combined(with: .opacity), removal: .opacity))
-                            }
-                        }
-                        // Animates only when IDs change while visible; a fresh page never replays history.
-                        .animation(spring(0.4, 0.8), value: shown.map(\.requestID))
-                    }
-                    if rows.count > shown.count {
-                        Text("Latest \(shown.count) of \(rows.count) in this snapshot")
-                            .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079"))
-                    }
-                }
+            if all.isEmpty {
+                notice("Quiet", "No messages between agents in the Hub snapshot yet.", symbol: "moon.zzz")
+            } else {
+                SeedTimelineView(transfers: all,
+                                 heldIDs: Set(inbox.held.map(\.requestID)),
+                                 freshIDs: freshIDs,
+                                 focusAgentID: $timelineAgentID,
+                                 busy: model.isRefreshingTincan || model.isReadingTincanTrace || model.activeDecisionRequestID != nil,
+                                 onOpen: { model.readTincanTask($0) })
             }
         } else {
             notice("Unverified", "Task metadata has not loaded yet.")
@@ -516,7 +723,7 @@ struct CoucouAgentWorkspace: View {
                 .frame(minWidth: 24, maxWidth: .infinity)
                 agentChip(entry.recipient, trailing: true)
                 statePill(state)
-                Text(CoucouHubFormat.relative(entry.createdAt))
+                Text(CoucouHubFormat.relative(entry.activityAt))
                     .font(.system(size: 10)).foregroundColor(Color(hex: "#6B7079")).frame(width: 40, alignment: .trailing)
                 Image(systemName: "chevron.right").font(.system(size: 9, weight: .semibold)).foregroundColor(Color(hex: "#6B7079"))
             }
@@ -596,6 +803,12 @@ struct CoucouAgentWorkspace: View {
                         .font(.system(size: 11.5, weight: .semibold)).foregroundColor(Color(hex: "#F5F6F8"))
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                if let owner = selected.fromSession, !owner.isEmpty {
+                    Text("Owner chat · \(owner)").font(.system(size: 10, design: .monospaced)).textSelection(.enabled)
+                }
+                if let target = selected.toSession, !target.isEmpty {
+                    Text("Recipient session · \(target)").font(.system(size: 10, design: .monospaced)).textSelection(.enabled)
+                }
                 // The selected request may be deep in a bounded trace. Never
                 // hide it behind a prefix while offering its approval controls.
                 ForEach(detail.steps) { step in
@@ -666,7 +879,7 @@ struct CoucouAgentWorkspace: View {
                     .accessibilityLabel("Allow exact held request \(selected.requestID)")
             }
         } else if selected.state.lowercased() == "needs_input" {
-            Text("Needs input is a clarification, not a held request. There is nothing to allow or deny here.")
+            Text("The agent is waiting for an answer from the owning chat. Open that chat and answer the original request; approving a held request will not resume this conversation.")
                 .font(.system(size: 10.5)).foregroundColor(Color(hex: "#8E939C")).fixedSize(horizontal: false, vertical: true)
         } else {
             Text(CoucouHubFormat.isClosed(selected.state)

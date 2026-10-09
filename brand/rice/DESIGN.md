@@ -14,14 +14,21 @@ the static halo uses #E8BC58. Original vectors are in rice.svg.
 
 Motion: spring stiffness 170/damping 25, integration in steps no larger than
 1/120s with a 50ms maximum elapsed interval. State retargets keep velocity and
-position. Breathing amplitude <2% and idle vertical drift <2px; a tap adds a
-brief squash impulse. Seven simulated states. Reduce motion snaps to a still
-pose. Hidden tabs stop rendering. This is not yet native SwiftUI integration.
+position. Pointer gaze has independent bounded ±3px/±2px springs; pointer leave
+retargets to center. Press feedback is an independent 1→0.97 multiplier, with
+inverse horizontal scale to keep the grain's area approximately constant.
+Breathing amplitude <2% and idle vertical drift <2px. Seven simulated states.
+Reduce motion snaps pose and input feedback to their targets; pause freezes all
+spring channels and holds the breathing/drift phase without a visual jump.
+Hidden tabs stop rendering and clear active input. This is not yet native
+SwiftUI integration.
 
 Preview UI inherits the dark neutral/system-font language of the existing
 workspace. Controls are labelled in Thai, keyboard focus is explicit, selected
 state uses aria-pressed and the status text is live. No network APIs or sounds.
 
-Verification: physics unit tests and interactive state/overflow checks pass;
-desktop and 390px-wide screenshots reviewed. Further user feedback is required
-before treating this study as the final app character or logo.
+Verification: physics unit tests cover state retargets, 100 rapid gaze/press
+reversals, bounds, convergence, cancellation targets, reduced motion, and pause.
+Interactive browser feel and desktop/mobile visual QA remain separate checks;
+further user feedback is required before treating this study as the final app
+character or logo.

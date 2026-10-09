@@ -39,16 +39,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Menu bar
 
+    /// Product name in the menu bar: Seed in the Hub build, Coucou upstream.
+    private var appName: String {
+        #if COUCOU_HUB
+        return CoucouBrand.name
+        #else
+        return "Coucou"
+        #endif
+    }
+
     private func setupMenuBarItem() {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         guard let button = statusItem?.button else { return }
-        button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "circle.fill", accessibilityDescription: "Coucou")
+        button.image = NSImage(named: "MenuBarIcon") ?? NSImage(systemSymbolName: "circle.fill", accessibilityDescription: appName)
         button.image?.size = NSSize(width: 24, height: 18)
-        button.image?.accessibilityDescription = "Coucou"
+        button.image?.accessibilityDescription = appName
         button.image?.isTemplate = true
 
         let menu = NSMenu()
-        menu.addItem(withTitle: "Open Coucou", action: #selector(openIsland), keyEquivalent: "")
+        menu.addItem(withTitle: "Open \(appName)", action: #selector(openIsland), keyEquivalent: "")
         menu.addItem(.separator())
         menu.addItem(withTitle: "Settings…", action: #selector(openSettings), keyEquivalent: ",")
         menu.addItem(.separator())
@@ -68,6 +77,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     @objc private func openSettingsFromNotification(_ notification: Notification) {
         if let section = notification.object as? String {
             UserDefaults.standard.set(section, forKey: "settingsSection")
+            #if COUCOU_HUB
+            if SeedSettingsPage(rawValue: section) != nil {
+                UserDefaults.standard.set(section, forKey: "seed.settings.page")
+            }
+            #endif
         }
         openSettings()
     }
@@ -83,8 +97,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let win = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 720, height: 560),
                            styleMask: [.titled, .closable, .miniaturizable, .resizable],
                            backing: .buffered, defer: false)
+        #if COUCOU_HUB
+        // Seed's own Settings, always dark like the notch.
+        win.title = "\(appName) Settings"
+        win.appearance = NSAppearance(named: .darkAqua)
+        win.backgroundColor = NSColor(red: 0x0E / 255, green: 0x0F / 255, blue: 0x11 / 255, alpha: 1)
+        let host = NSHostingView(rootView: SeedSettingsView())
+        #else
         win.title = "Settings — Coucou"
         let host = NSHostingView(rootView: SettingsView())
+        #endif
         host.sizingOptions = [.minSize]
         win.contentView = host
         win.contentMinSize = NSSize(width: 640, height: 420)
@@ -131,9 +153,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NotificationCenter.default.addObserver(self, selector: #selector(openSettingsFromNotification(_:)),
                                                name: .openFullSettings, object: nil)
         // After the greeting ends, fly Mochi back to the desktop if it was there at last quit
+        #if !COUCOU_HUB
         NotificationCenter.default.addObserver(forName: .greetComplete, object: nil, queue: .main) { _ in
             DesktopMochiController.shared.launchFlyIfNeeded()
         }
+        #endif
         #if !APPSTORE
         _ = MusicController.shared
         #endif

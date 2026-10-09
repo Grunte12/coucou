@@ -13,7 +13,12 @@ final class FileDropNSView: NSView {
 
     override init(frame: NSRect) {
         super.init(frame: frame)
+        #if COUCOU_HUB
+        // Seed also takes text, links, images and file promises from agent apps.
+        registerForDraggedTypes([.fileURL] + SeedDropMaterializer.extraTypes)
+        #else
         registerForDraggedTypes([.fileURL])
+        #endif
     }
     required init?(coder: NSCoder) { fatalError() }
 
@@ -31,12 +36,27 @@ final class FileDropNSView: NSView {
     override func draggingExited(_ sender: NSDraggingInfo?) { onDragExited?() }
 
     override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
+        #if COUCOU_HUB
+        let pending = MainActor.assumeIsolated { SeedDropMaterializer.begin(from: sender.draggingPasteboard) }
+        let deliver = onFilesDropped
+        Task { @MainActor in
+            let urls = await pending()
+            if urls.isEmpty {
+                AppState.shared.fileDragOver = false
+                NotificationCenter.default.post(name: .coucouShelfRejected, object: nil)
+            } else {
+                deliver?(urls)
+            }
+        }
+        return true
+        #else
         guard let urls = sender.draggingPasteboard.readObjects(
             forClasses: [NSURL.self],
             options: [.urlReadingFileURLsOnly: true]
         ) as? [URL], !urls.isEmpty else { return false }
         onFilesDropped?(urls)
         return true
+        #endif
     }
 }
 
@@ -45,6 +65,25 @@ final class FileDropNSView: NSView {
 enum FileDropHandler {
     @MainActor
     static func handle(urls: [URL], state: AppState) async {
+        #if COUCOU_HUB
+        // Folders section open: a dropped folder is pinned, files still go to the shelf.
+        var urls = urls
+        if SeedFolderStore.shared.acceptsPins {
+            let folders = urls.filter { url in
+                var dir: ObjCBool = false
+                let isDir = FileManager.default.fileExists(atPath: url.path, isDirectory: &dir) && dir.boolValue
+                return isDir && !NSWorkspace.shared.isFilePackage(atPath: url.path)
+            }
+            folders.forEach { SeedFolderStore.shared.pin($0) }
+            urls.removeAll { u in folders.contains(u) }
+            if !folders.isEmpty { SoundEngine.shared.play("pop") }
+        }
+        if !urls.isEmpty { CoucouHubIntegration.shared.stageFiles(urls) }
+        state.fileDragOver = false
+        // The Shelf section shows the parked files and any rejection.
+        // Do not use the upstream simulated upload animation for local staging.
+        return
+        #else
         guard let url = urls.first else { return }
         let name = url.lastPathComponent
 
@@ -120,5 +159,6 @@ enum FileDropHandler {
         // Switch to choose — canvas stays active (uploadActive covers .choose).
         // Engine deactivates when user clicks a canvas choose button or navigates away.
         state.view = .choose
+        #endif
     }
 }

@@ -80,33 +80,56 @@
     svg.querySelectorAll('[fill],[stroke]').forEach(el=>['fill','stroke'].forEach(attr=>{const value=el.getAttribute(attr);if(value?.startsWith('url(#'))el.setAttribute(attr,value.replace('url(#','url(#'+id+'-'));}));
     document.querySelector('#'+id).append(svg); return svg;
   });
-  let gaze=0, gazeY=0, previous=0, raf=0;
+  let previous=0, raf=0;
+  const activePointers=new Set(), activeKeys=new Set();
+  function updatePress(){ motion.setPressed(activePointers.size>0||activeKeys.size>0); restart(); }
+  function releaseInputs(){ activePointers.clear(); activeKeys.clear(); motion.setPressed(false); restart(); }
   grain.addEventListener('pointermove',event=>{
-    const r=grain.getBoundingClientRect(); gaze=Math.tanh((event.clientX-r.left-r.width/2)/100)*3; gazeY=Math.tanh((event.clientY-r.top-r.height/2)/100)*2; restart();
+    const r=grain.getBoundingClientRect();
+    motion.setCursor(Math.tanh((event.clientX-r.left-r.width/2)/100)*3,Math.tanh((event.clientY-r.top-r.height/2)/100)*2); restart();
   });
-  grain.addEventListener('pointerleave',()=>{gaze=gazeY=0;restart();});
-  grain.addEventListener('pointerdown',()=>{
-    if (!reduced.checked) { motion.springs.sy.velocity=-1.4; motion.springs.sx.velocity=.7; } restart();
+  grain.addEventListener('pointerleave',()=>{motion.clearCursor();restart();});
+  grain.addEventListener('pointerdown',event=>{
+    if (event.button!==0 || !event.isPrimary) return;
+    activePointers.add(event.pointerId); updatePress();
   });
-  grain.addEventListener('click',event=>{if(event.detail===0){motion.springs.sy.velocity=-1.4;restart();}});
+  window.addEventListener('pointerup',event=>{activePointers.delete(event.pointerId);updatePress();});
+  window.addEventListener('pointercancel',event=>{activePointers.delete(event.pointerId);updatePress();});
+  grain.addEventListener('lostpointercapture',event=>{activePointers.delete(event.pointerId);updatePress();});
+  grain.addEventListener('keydown',event=>{
+    if ((event.key===' '||event.key==='Enter')&&!event.repeat) { activeKeys.add(event.key); updatePress(); }
+  });
+  window.addEventListener('keyup',event=>{
+    if (activeKeys.delete(event.key)) updatePress();
+  });
+  grain.addEventListener('click',event=>{
+    // Native keyboard and assistive-technology activation has detail 0. Give
+    // that activation one rendered frame of press feedback without a timer.
+    if (event.detail===0 && !activePointers.size && !activeKeys.size) {
+      motion.setPressed(true); restart();
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{motion.setPressed(false);restart();}));
+    }
+  });
+  grain.addEventListener('focusout',releaseInputs);
+  window.addEventListener('blur',releaseInputs);
   function draw(time){
     raf=0; const dt=previous?Math.min((time-previous)/1000,.05):0; previous=time;
     const v=motion.frame(dt,reduced.checked,pause.checked);
     pose.setAttribute('transform',`translate(${160+v.x} ${160+v.y}) rotate(${v.angle})`);
-    shape.setAttribute('transform',`scale(${v.sx} ${v.sy})`);
-    eyes.setAttribute('transform',`translate(${gaze+v.gaze} ${gazeY})`);
+    shape.setAttribute('transform',`scale(${v.sx/v.press} ${v.sy*v.press})`);
+    eyes.setAttribute('transform',`translate(${v.cursorX+v.gaze} ${v.cursorY})`);
     const blink = !reduced.checked && !pause.checked && (motion.elapsed % 4.4 > 4.23);
     document.querySelectorAll('.pupil').forEach(p=>p.setAttribute('ry',motion.state==='resting'||blink?'1.2':'5.3'));
     halo.setAttribute('opacity',String(v.glow)); signal.setAttribute('opacity',motion.state==='sending'?'1':'0');
     clones.forEach(svg=>{
       svg.querySelector('[id$="ricePose"]').setAttribute('transform',`translate(160 160) rotate(${v.angle})`);
-      svg.querySelector('[id$="riceShape"]').setAttribute('transform',`scale(${v.sx} ${v.sy})`);
+      svg.querySelector('[id$="riceShape"]').setAttribute('transform',`scale(${v.sx/v.press} ${v.sy*v.press})`);
     });
     if (!document.hidden && !pause.checked && !reduced.checked) raf=requestAnimationFrame(draw);
   }
-  function restart(){if(!raf){previous=0;raf=requestAnimationFrame(draw);}}
+  function restart(){if(!raf&&!document.hidden){previous=0;raf=requestAnimationFrame(draw);}}
   reduced.addEventListener('change',restart); pause.addEventListener('change',restart);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;previous=0;}else restart();});
+  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(raf);raf=0;previous=0;releaseInputs();}else restart();});
   restart();
   window.ricePreview = { select(state){ document.querySelector(`[data-state="${state}"]`)?.click(); }, get state(){return motion.state;} };
 </script>

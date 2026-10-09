@@ -10,7 +10,12 @@ final class AppState: ObservableObject {
     // Island state
     @Published var mode: IslandMode = .hidden
     #if COUCOU_HUB
-    @Published var view: IslandView = .linkHub
+    /// Seed shows only its workspace and its hook cards. Coucou paths that still
+    /// ask for another view (hotkeys, chat, wardrobe…) land on the workspace.
+    @Published var view: IslandView = .linkHub {
+        didSet { if !Self.seedViews.contains(view) { view = .linkHub } }
+    }
+    static let seedViews: Set<IslandView> = [.linkHub, .approval, .question, .finished, .error, .confused, .greeting]
     #else
     @Published var view: IslandView = .overview
     #endif

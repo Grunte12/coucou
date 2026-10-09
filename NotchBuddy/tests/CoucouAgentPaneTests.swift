@@ -49,6 +49,15 @@ enum CoucouAgentPaneTests {
         precondition(CoucouHubFormat.relative(nil) == "—")
         precondition(CoucouHubFormat.date("2026-10-06T10:00:00Z") != nil)
         _ = summary("z", "2026-10-06T10:00:00Z")
+        let oldRequest = summary("same-request", "2026-10-06T09:00:00Z", state: "queued")
+        let replyJSON = #"{"id":"same-request","request_id":"same-request","trace_id":"t-same-request","from":"codex","to":"claude-code","state":"needs_input","title":"work","created_at":"2026-10-06T09:00:00Z","updated_at":"2026-10-06T12:00:00Z","from_session":"owner-chat","to_session":"target-session"}"#
+        let replied = try JSONDecoder().decode(HubTincanTraceSummary.self, from: Data(replyJSON.utf8))
+        precondition(CoucouHubFormat.changedTransfers(previous: [oldRequest.requestID: oldRequest], current: [replied]) == [replied.requestID])
+        precondition(CoucouHubFormat.changedTransfers(previous: [replied.requestID: replied], current: [replied]).isEmpty)
+        precondition(replied.fromSession == "owner-chat" && replied.toSession == "target-session")
+        let activityOrder = HubTincanInbox(status: .ready, enabled: true, heldCount: 0,
+            heldTruncated: false, traces: [summary("new-task", "2026-10-06T11:00:00Z"), replied], held: [])
+        precondition(CoucouHubFormat.transfers(activityOrder).first?.requestID == replied.requestID)
         print("CoucouAgentPaneTests passed")
     }
 }

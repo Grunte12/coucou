@@ -110,17 +110,24 @@ schemes:
     run:
       config: Debug
 
-  CoucouHub:
+  Seed:
     build:
       targets:
-        CoucouHub: all
+        Seed: all
+    run:
+      config: Debug
+
+  SeedLab:
+    build:
+      targets:
+        SeedLab: all
     run:
       config: Debug
 
 targets:
-  # Migration target: the real Coucou app/shell plus our existing Hub model.
-  # Same installed identity is intentional. Do not install alongside HubIsland.
-  CoucouHub:
+  # Seed: our own product, built on the Coucou shell (kept as a code reference)
+  # plus the Hub model. Own bundle id; installs alongside, never over, HubIsland.
+  Seed:
     type: application
     platform: macOS
     sources:
@@ -135,17 +142,19 @@ targets:
           - "HubIslandApp.swift"
           - "HubIslandWindowController.swift"
           - "HubIslandInstaller.swift"
-      - path: Assets.xcassets
+      - path: Resources/Seed/Assets.xcassets
         buildPhase: resources
-      - path: Resources/sounds
+      # Seed's own sounds (ElevenLabs), same file names as Coucou's so the
+      # SoundEngine calls stay untouched. Coucou's folder stays as a reference.
+      - path: Resources/Seed/sounds
         type: folder
         buildPhase: resources
     info:
-      path: Resources/CoucouHub-Info.plist
+      path: Resources/Seed-Info.plist
       properties:
-        CFBundleName: Hub Notch
-        CFBundleDisplayName: Hub Notch
-        CFBundleIdentifier: com.hubisland.desktop
+        CFBundleName: Seed
+        CFBundleDisplayName: Seed
+        CFBundleIdentifier: com.grunte.seed
         CFBundleVersion: "2"
         CFBundleShortVersionString: "1.1"
         LSUIElement: YES
@@ -154,8 +163,8 @@ targets:
           NSAllowsLocalNetworking: YES
     settings:
       base:
-        PRODUCT_NAME: HubIsland
-        PRODUCT_BUNDLE_IDENTIFIER: com.hubisland.desktop
+        PRODUCT_NAME: Seed
+        PRODUCT_BUNDLE_IDENTIFIER: com.grunte.seed
         SWIFT_ACTIVE_COMPILATION_CONDITIONS: COUCOU_HUB
         CODE_SIGNING_ALLOWED: NO
         CODE_SIGNING_REQUIRED: NO
@@ -168,6 +177,52 @@ targets:
           CODE_SIGN_IDENTITY: ""
           DEVELOPMENT_TEAM: ""
           CODE_SIGN_ENTITLEMENTS: ""
+
+  # Agent test lab: the Seed notch UI in an ordinary window with fixture
+  # data, driven by a script and snapshotting only its own views. Its own
+  # bundle id, so it never shares preferences, Keychain or permissions with the
+  # installed app. Never shipped. See scripts/seed-lab.sh.
+  SeedLab:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources
+        excludes:
+          - "HubIsland/**"
+          - "Phone/**"
+          - "Widgets/**"
+          - "NotificationContent/**"
+          - "App/NotchBuddyApp.swift"
+      - path: Sources/HubIsland
+        excludes:
+          - "HubIslandApp.swift"
+          - "HubIslandWindowController.swift"
+          - "HubIslandInstaller.swift"
+      - path: Lab
+      - path: Resources/Seed/Assets.xcassets
+        buildPhase: resources
+      - path: Resources/Seed/sounds
+        type: folder
+        buildPhase: resources
+    info:
+      path: Resources/SeedLab-Info.plist
+      properties:
+        CFBundleName: Seed Lab
+        CFBundleDisplayName: Seed Lab
+        CFBundleIdentifier: com.grunte.seed.lab
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1"
+        LSUIElement: YES
+        NSHighResolutionCapable: YES
+    settings:
+      base:
+        PRODUCT_NAME: SeedLab
+        PRODUCT_BUNDLE_IDENTIFIER: com.grunte.seed.lab
+        SWIFT_ACTIVE_COMPILATION_CONDITIONS: "COUCOU_HUB COUCOU_LAB"
+        CODE_SIGNING_ALLOWED: NO
+        CODE_SIGNING_REQUIRED: NO
+        DEVELOPMENT_TEAM: ""
+        CODE_SIGN_ENTITLEMENTS: ""
 
   NotchBuddy:
     type: application

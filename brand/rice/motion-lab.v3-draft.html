@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rice motion lab v3</title>
+<style>
+:root{color-scheme:dark;--bg:#0b0c0e;--card:#141518;--line:rgba(255,255,255,.07);--tx:#f5f6f8;--mu:#8e939c;--dim:#6b7079;--gold:#ffd21a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Thonburi",system-ui,sans-serif}
+header{padding:18px 22px 6px;display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+h1{margin:0;font-size:18px}header p{margin:4px 0 0;color:var(--mu);max-width:760px}
+.wrap{display:grid;grid-template-columns:minmax(300px,400px) 1fr;gap:18px;padding:14px 22px 40px;align-items:start}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.left{position:sticky;top:12px;display:grid;gap:12px}
+#stage{position:relative;height:320px;border-radius:14px;background:#030304;overflow:hidden;cursor:default;touch-action:none;user-select:none}
+#stage .big{position:absolute;left:50%;top:54%;width:240px;height:240px;margin:-120px 0 0 -120px;cursor:pointer}
+#stage .hint{position:absolute;left:12px;bottom:10px;color:var(--dim);font-size:12px}
+#stage .tag{position:absolute;right:12px;top:10px;color:var(--mu);font-size:12px}
+#cap{position:absolute;left:50%;top:12px;transform:translateX(-50%);padding:4px 12px;border-radius:999px;background:#17181b;border:1px solid rgba(255,210,26,.35);color:#fff3b0;font-size:12.5px;opacity:0;transition:opacity .25s;white-space:nowrap;pointer-events:none}
+#cap.on{opacity:1}
+.small{display:flex;align-items:center;gap:18px;background:#000;border-radius:12px;padding:10px 14px}
+.small span{color:var(--dim);font-size:11px}
+.tools{display:flex;gap:14px;flex-wrap:wrap;color:var(--mu);font-size:13px;align-items:center}
+.tools label{display:flex;gap:6px;align-items:center}
+h2{margin:0 0 8px;font-size:13px;color:var(--mu);font-weight:600;letter-spacing:.02em}
+.group{margin-bottom:16px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:8px 10px;border:1px solid var(--line);border-radius:12px;margin-bottom:6px;background:#0e0f11}
+.item.off{opacity:.45}
+.item b{font-weight:600}.item small{display:block;color:var(--mu)}
+.item code{color:var(--gold);font-size:11px;margin-right:6px}
+button.play{background:#1d1f23;color:var(--tx);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font:inherit;cursor:pointer}
+button.play:hover{background:#26282d}button.play:focus-visible,#copy:focus-visible{outline:2px solid var(--gold)}
+.choice{margin-bottom:12px}.choice .q{font-weight:600;margin-bottom:5px}
+.opts{display:flex;gap:6px;flex-wrap:wrap}
+.opts label{border:1px solid var(--line);border-radius:999px;padding:5px 12px;cursor:pointer;color:var(--mu)}
+.opts input{position:absolute;opacity:0}
+.opts label:has(input:checked){background:#1d1f23;color:var(--tx);border-color:rgba(255,210,26,.6)}
+.opts label:has(input:focus-visible){outline:2px solid var(--gold)}
+textarea{width:100%;height:230px;background:#0e0f11;color:var(--tx);border:1px solid var(--line);border-radius:12px;padding:10px;font:12px/1.5 ui-monospace,Menlo,monospace}
+#copy{margin-top:6px}.state{color:var(--gold);font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Rice motion lab v3</h1>
+  <p>ตัวขาวขึ้น ออร่าแรงขึ้น มีประกายแสงพุ่งออกมา และทุกท่ามีแอนิเมชันประกอบ ลองขยับเมาส์ในกรอบดำ กดที่ตัว กด Play ที่แต่ละรายการ เลือกตัวเลือก ติ๊กออกถ้าไม่เอา แล้วคัดลอกผลท้ายหน้าส่งกลับมา</p></div>
+  <div class="opts" role="group" aria-label="ภาษาคำพูดสั้นๆ"><label><input type="radio" autocomplete="off" name="lang" value="th" checked>ไทย</label><label><input type="radio" autocomplete="off" name="lang" value="en">English</label></div>
+</header>
+<div class="wrap">
+  <div class="left">
+    <div class="panel">
+      <div id="stage" aria-label="พื้นที่ทดลอง"><div class="tag" id="tag">idle</div><div id="cap" role="status"></div><div class="hint">ขยับเมาส์ · กด · กดค้าง · กดรัว</div></div>
+      <div class="small" style="margin-top:10px"><div id="s36"></div><div id="s52"></div><span>36 px / 52 px — ขนาดจริงใน notch</span></div>
+      <div class="tools" style="margin-top:10px">
+        <label><input type="checkbox" autocomplete="off" id="reduced">Reduce Motion</label>
+        <label><input type="checkbox" autocomplete="off" id="pause">พัก</label>
+        <button class="play" id="toggleOpen">ปิด island (X1)</button>
+      </div>
+    </div>
+    <div class="panel"><h2>ท่าตามสถานะ (S1–S7)</h2><div class="opts" id="states"></div><p class="state" id="stateLabel"></p></div>
+  </div>
+  <div>
+    <div class="panel group"><h2>ตัวเลือกที่ต้องเลือก</h2><div id="choices"></div></div>
+    <div class="panel group"><h2>รายการ motion — กด Play · ติ๊กออกถ้าไม่เอา</h2><div id="catalog"></div></div>
+    <div class="panel"><h2>ผลที่คุณเลือก (คัดลอกส่งกลับมาได้เลย)</h2><textarea id="out" readonly aria-label="ผลที่เลือก"></textarea><br><button class="play" id="copy">คัดลอก</button></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <radialGradient id="rFill" cx=".42" cy=".36" r=".78"><stop stop-color="#fff"/><stop offset=".72" stop-color="#fff"/><stop offset=".87" stop-color="#fffdf0"/><stop offset=".95" stop-color="#fff4bd"/><stop offset="1" stop-color="#ffe680"/></radialGradient>
+  <linearGradient id="rRim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff58a"/><stop offset=".4" stop-color="#ffd400"/><stop offset="1" stop-color="#ffb800"/></linearGradient>
+  <radialGradient id="rBottom" cx=".5" cy="1" r=".7"><stop stop-color="#ffc800" stop-opacity=".45"/><stop offset="1" stop-color="#ffc800" stop-opacity="0"/></radialGradient>
+  <radialGradient id="rHalo"><stop stop-color="#ffe94d" stop-opacity=".7"/><stop offset=".4" stop-color="#ffd400" stop-opacity=".24"/><stop offset="1" stop-color="#ffd400" stop-opacity="0"/></radialGradient>
+  <filter id="rGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="12"/></filter>
+  <filter id="rRimGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter>
+  <filter id="rInner" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+  <filter id="rSoft" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="1.2"/></filter>
+</defs></svg>
+
+<script>
+'use strict';
+// ---------- physics: same spring model as motion.mjs (substeps <= 1/120 s, dt cap 50 ms) ----------
+class Spring{
+  constructor(v,k=170,c=25){this.v=this.t=v;this.vel=0;this.k=k;this.c=c}
+  to(t){this.t=t} jolt(v){this.v=v} kick(x){this.vel+=x} snap(){this.v=this.t;this.vel=0}
+  step(s){let r=Math.min(Math.max(s,0),.05);while(r>0){const d=Math.min(r,1/120);this.vel+=(this.k*(this.t-this.v)-this.c*this.vel)*d;this.v+=this.vel*d;r-=d}}
+}
+const POSES={
+  idle:{x:0,y:0,angle:-4,sx:1,sy:1,glow:.6,eye:1,blush:.14},
+  thinking:{x:-4,y:-8,angle:-10,sx:.97,sy:1.04,glow:.65,eye:1,blush:.1},
+  working:{x:0,y:-3,angle:3,sx:.95,sy:1.07,glow:.85,eye:.92,blush:.1},
+  sending:{x:0,y:-8,angle:10,sx:.92,sy:1.1,glow:1,eye:.92,blush:.1},
+  approval:{x:0,y:-6,angle:0,sx:1.05,sy:.96,glow:.9,eye:1.18,blush:.08},
+  done:{x:0,y:-14,angle:0,sx:1.04,sy:.97,glow:1,eye:.5,blush:.65},
+  resting:{x:0,y:20,angle:-78,sx:1.06,sy:.9,glow:.25,eye:.1,blush:.2},
+};
+const PROP_OF={thinking:'think',working:'work',sending:'send',approval:'appr',done:'done',resting:'rest'};
+const TXT={
+  th:{idle:'พร้อมแล้ว',thinking:'กำลังคิด…',working:'กำลังทำงาน…',sending:'กำลังส่ง…',approval:'รอคุณอนุมัติ',done:'เสร็จแล้ว',resting:'พักอยู่',wai:'สวัสดี',drop:'วางแล้ว',full:'เต็มแล้ว',copy:'คัดลอกแล้ว'},
+  en:{idle:'Ready',thinking:'Thinking…',working:'Working…',sending:'Sending…',approval:'Needs your OK',done:'Done',resting:'Resting',wai:'Hello',drop:'Parked',full:'Shelf full',copy:'Copied'},
+};
+const STATE_NAME={idle:'S1 idle',thinking:'S2 thinking',working:'S3 working',sending:'S4 sending',approval:'S5 approval',done:'S6 done',resting:'S7 resting'};
+const BOUNCE={soft:[170,25],jelly:[240,13],bouncy:[300,9]};
+const GAZE={subtle:[5,3],normal:[9,6],big:[13,8]}; // full-range reach of the eyes inside the body, rice units
+const SPARK={off:0,normal:1,more:2.3};
+const choice={bounce:'jelly',gaze:'normal',spam:'accumulate',sending:'6',bored:'keep',usage:'keep',sparkle:'normal',caption:'on',lang:'th'};
+const keep={};
+
+const E={
+  state:'idle',
+  pose:Object.fromEntries(Object.keys(POSES.idle).filter(k=>k!=='blush').map(k=>[k,new Spring(POSES.idle[k])])),
+  curX:new Spring(0,200,22),curY:new Spring(0,200,22),
+  lookX:new Spring(0,170,25),lookY:new Spring(0,170,25),
+  lean:new Spring(0,170,25),tilt:new Spring(0,200,20),shake:new Spring(0,300,10),
+  bowA:new Spring(0,200,15),bowY:new Spring(0,200,15),
+  sqx:new Spring(1,240,13),sqy:new Spring(1,240,13),scale:new Spring(1,200,16),
+  blink:new Spring(1,420,30),boost:new Spring(0,170,25),blush:new Spring(.14,170,25),hop:new Spring(0,220,14),shakeA:new Spring(0,380,12),smile:new Spring(0,260,20),flashT:-9,lastP:0,
+  prop:{think:new Spring(0,230,15),work:new Spring(0,230,15),send:new Spring(0,230,15),appr:new Spring(0,230,15),done:new Spring(0,230,15),rest:new Spring(0,230,15)},
+  elapsed:0,open:true,nextBlink:3,idleSince:0,acc:0,
+};
+const parts=[];
+function applyBounce(){const[k,c]=BOUNCE[choice.bounce];for(const s of[E.sqx,E.sqy]){s.k=k;s.c=c}E.scale.k=k*.85;E.scale.c=c*1.2}
+const later=(ms,fn)=>setTimeout(fn,ms);
+const reduced=()=>document.getElementById('reduced').checked, paused=()=>document.getElementById('pause').checked;
+let capTimer=null;
+function caption(key,ms=1700){
+  if(choice.caption!=='on')return;
+  const el=document.getElementById('cap');el.textContent=TXT[choice.lang][key];el.classList.add('on');
+  clearTimeout(capTimer);capTimer=later(ms,()=>el.classList.remove('on'));
+}
+function select(name,silent){
+  const changed=E.state!==name;E.state=name;
+  const p=POSES[name];E.blush.to(p.blush);
+  for(const k in p){if(k==='blush')continue;E.pose[k].to(k==='x'&&name==='sending'?(choice.sending==='38'?38:choice.sending==='6'?6:0):p[k])}
+  for(const k in E.prop)E.prop[k].to(PROP_OF[name]===k?1:0);
+  E.smile.to(name==='done'?1:0);
+  document.getElementById('tag').textContent=name;
+  document.getElementById('stateLabel').textContent=STATE_NAME[name]+' · '+TXT[choice.lang][name];
+  document.querySelectorAll('#states input').forEach(i=>i.checked=i.value===name);
+  if(changed&&!silent){caption(name);if(name==='done')joyHop()}
+}
+
+// ---------- rendering ----------
+const BODY='M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z';
+const STAR='M0 -1 C.1 -.28 .28 -.1 1 0 C.28 .1 .1 .28 0 1 C-.1 .28 -.28 .1 -1 0 C-.28 -.1 -.1 -.28 0 -1Z';
+const FLAME='M0 -1.5 C.85 -.45 .85 .75 0 .95 C-.85 .75 -.85 -.45 0 -1.5Z'; // Thai flame (kranok) feel
+const DOT='M-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0';
+const NS='http://www.w3.org/2000/svg';
+const POOL=44;
+let riceUid=0;
+function makeRice(host,px){
+  const id='riceClip'+(riceUid++);
+  host.innerHTML=`<svg viewBox="0 0 320 320" width="${px}" height="${px}" role="img" aria-label="rice mascot" style="display:block;overflow:visible"><clipPath id="${id}"><path d="${BODY}"/></clipPath>
+  <g class="pose"><ellipse class="halo2" rx="190" ry="200" fill="url(#rHalo)"/><ellipse class="halo" rx="140" ry="150" fill="url(#rHalo)"/>
+  <g class="shape">
+    <path class="bloom" d="${BODY}" fill="#ffcc00" filter="url(#rGlow)"/>
+    <path class="rimglow" d="${BODY}" fill="none" stroke="#ffd21a" stroke-width="12" filter="url(#rRimGlow)"/>
+    <path d="${BODY}" fill="url(#rFill)"/>
+    <g clip-path="url(#${id})"><path class="inner" d="${BODY}" fill="none" stroke="#ffc800" stroke-width="18" filter="url(#rInner)"/></g>
+    <path d="${BODY}" fill="url(#rBottom)"/>
+    <path d="${BODY}" fill="none" stroke="url(#rRim)" stroke-width="6.5"/>
+    <path d="${BODY}" transform="scale(.94)" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+    <ellipse class="hl" cx="-22" cy="-52" rx="12" ry="7" fill="#fff" opacity=".95" transform="rotate(-30 -22 -52)"/>
+    <circle cx="-4" cy="-70" r="3" fill="#fff" opacity=".9"/>
+  </g>
+  <g class="fx"></g>
+  <ellipse class="ch1" rx="9.5" ry="5.5" fill="#ff9f45"/><ellipse class="ch2" rx="9.5" ry="5.5" fill="#ff9f45"/>
+  <path class="a1" fill="none" stroke="#2b1d05" stroke-width="5" stroke-linecap="round"/><path class="a2" fill="none" stroke="#2b1d05" stroke-width="5" stroke-linecap="round"/>
+  <ellipse class="e1" rx="7.5" ry="11" fill="#2b1d05"/><ellipse class="e2" rx="7.5" ry="11" fill="#2b1d05"/>
+  <circle class="c1" r="2.6" fill="#fff"/><circle class="c2" r="2.6" fill="#fff"/></g>
+  <g class="props"><circle class="fl" r="60" cy="-4" fill="none" stroke="#fff6b0" stroke-width="5" opacity="0"/>
+    <g class="pThink"><circle cx="44" cy="-78" r="4" fill="#fff" stroke="#ffd21a" stroke-width="1.6"/><circle cx="58" cy="-94" r="6.5" fill="#fff" stroke="#ffd21a" stroke-width="1.8"/>
+      <ellipse cx="94" cy="-124" rx="38" ry="22" fill="#fff" stroke="#ffd21a" stroke-width="2.2"/>
+      <g class="tdots"><circle class="td0" cx="78" cy="-124" r="3.8" fill="#d9a21b"/><circle class="td1" cx="94" cy="-124" r="3.8" fill="#d9a21b"/><circle class="td2" cx="110" cy="-124" r="3.8" fill="#d9a21b"/></g><text class="tq" x="94" y="-114" text-anchor="middle" font-size="30" font-weight="800" fill="#d9a21b" font-family="system-ui,sans-serif">?</text></g>
+    <g class="pWork"><g class="gear"><circle r="10" fill="none" stroke="#ffd21a" stroke-width="6" stroke-dasharray="5.2 5.2"/><circle r="8" fill="#fff" stroke="#ffd21a" stroke-width="2.5"/><circle r="3" fill="#ffd21a"/></g><circle class="ring" r="100" cy="-4" fill="none" stroke="#ffd21a" stroke-width="3.5" stroke-linecap="round" stroke-dasharray="30 24 8 24" filter="url(#rSoft)"/></g>
+    <g class="pSend"><path class="plane" d="M0 0 L30 -9 L10 3 L5 14 Z" fill="#fff6b0" stroke="#ffc400" stroke-width="2" stroke-linejoin="round"/><circle class="sd0" r="4.5" fill="#ffe14d"/><circle class="sd1" r="4.5" fill="#ffe14d"/><circle class="sd2" r="4.5" fill="#ffe14d"/></g>
+    <g class="pAppr"><circle class="ar0" r="70" cy="-4" fill="none" stroke="#ffd21a" stroke-width="2.5"/><circle class="ar1" r="70" cy="-4" fill="none" stroke="#ffd21a" stroke-width="2.5"/>
+      <g class="badge"><circle cx="66" cy="-88" r="15" fill="#ffc400" stroke="#fff" stroke-width="2.2"/><text x="66" y="-80" text-anchor="middle" font-size="22" font-weight="800" fill="#4a3200" font-family="system-ui,sans-serif">!</text></g></g>
+    <g class="pDone"><g class="badge"><circle cx="66" cy="-88" r="15" fill="#ffd000" stroke="#fff" stroke-width="2.2"/><path d="M58.5 -88 l5.5 6.5 l10.5 -13" fill="none" stroke="#4a3200" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/></g></g>
+    <g class="pRest"><text class="z0" x="48" y="-62" font-size="26" font-weight="700" fill="#fff4b0" font-family="system-ui,sans-serif">z</text><text class="z1" x="68" y="-88" font-size="19" font-weight="700" fill="#fff4b0" font-family="system-ui,sans-serif">z</text><text class="z2" x="86" y="-110" font-size="14" font-weight="700" fill="#fff4b0" font-family="system-ui,sans-serif">z</text></g>
+  </g></svg>`;
+  const q=s=>host.querySelector(s), fx=q('.fx'), pool=[];
+  for(let i=0;i<POOL;i++){const p=document.createElementNS(NS,'path');p.setAttribute('opacity','0');fx.appendChild(p);pool.push(p)}
+  return{pose:q('.pose'),shape:q('.shape'),halo:q('.halo'),halo2:q('.halo2'),bloom:q('.bloom'),rimglow:q('.rimglow'),inner:q('.inner'),hl:q('.hl'),
+    e1:q('.e1'),e2:q('.e2'),c1:q('.c1'),c2:q('.c2'),ch1:q('.ch1'),ch2:q('.ch2'),pool,props:q('.props'),
+    think:q('.pThink'),work:q('.pWork'),send:q('.pSend'),appr:q('.pAppr'),done:q('.pDone'),rest:q('.pRest'),
+    td:[q('.td0'),q('.td1'),q('.td2')],ring:q('.ring'),sd:[q('.sd0'),q('.sd1'),q('.sd2')],ar:[q('.ar0'),q('.ar1')],
+    a:[q('.a1'),q('.a2')],gear:q('.gear'),plane:q('.plane'),tq:q('.tq'),tdots:q('.tdots'),fl:q('.fl'),badgeA:q('.pAppr .badge'),badgeD:q('.pDone .badge'),z:[q('.z0'),q('.z1'),q('.z2')]};
+}
+const views=[makeRice(document.getElementById('s36'),36),makeRice(document.getElementById('s52'),52)];
+const stage=document.getElementById('stage');
+const bigHost=document.createElement('div');bigHost.className='big';stage.appendChild(bigHost);
+views.push(makeRice(bigHost,240));
+
+const clamp01=x=>Math.max(0,Math.min(1,x));
+const ease=k=>k*k*(3-2*k);
+// Sending loop: crouch, lunge forward, recover. One cycle = 1.8 s.
+function launch(t){
+  const p=(t%1.8)/1.8;let x,sy,a;
+  if(p<.3){const k=ease(p/.3);x=-5*k;sy=-.14*k;a=-6*k}
+  else if(p<.45){const k=ease((p-.3)/.15);x=-5+22*k;sy=-.14+.26*k;a=-6+22*k}
+  else{const k=(p-.45)/.55,e=1-Math.pow(1-k,3);x=17*(1-e);sy=.12*(1-e);a=16*(1-e)}
+  return{p,x,sy,a};
+}
+function values(){
+  const r=reduced(),P=E.pose,t=E.elapsed;
+  const W={think:clamp01(E.prop.think.v),work:clamp01(E.prop.work.v),send:clamp01(E.prop.send.v),appr:clamp01(E.prop.appr.v),done:clamp01(E.prop.done.v),rest:clamp01(E.prop.rest.v)};
+  let breath=0,drift=0,dA=0,dX=0,dY=0,mx=1,my=1;
+  if(!r){
+    breath=Math.sin(t*(2.3-W.rest*1.0));drift=Math.sin(t*1.7)*1.6*(1-W.rest);
+    // thinking: tilts the head side to side, weight shifts, floats
+    dA+=Math.sin(t*1.1)*10*W.think;dX+=Math.sin(t*.55)*4*W.think;dY+=Math.sin(t*1.6)*2*W.think;
+    // working: quick hops in place like typing, squashing on each landing
+    const hp=Math.abs(Math.sin(t*7.5));dY-=hp*6*W.work;my*=1+(hp-.5)*.1*W.work;mx*=1-(hp-.5)*.07*W.work;dA+=Math.sin(t*3.75)*3*W.work;
+    // sending: crouch, lunge forward, recover
+    const L=launch(t);dX+=L.x*W.send;my*=1+L.sy*W.send;mx*=1-L.sy*.8*W.send;dA+=L.a*W.send;
+    // approval: double nod every 3 s
+    const q=t%3,nod=q<.9?Math.pow(Math.sin(q/.9*Math.PI*2),2):0;dA+=nod*11*W.appr;dY+=nod*3*W.appr;my*=1+.03*W.appr;
+    // done: happy sway
+    dA+=Math.sin(t*2.4)*5*W.done;dY-=Math.abs(Math.sin(t*2.4))*2*W.done;
+    // resting: slow deep breathing
+    my*=1+Math.sin(t*1.3)*.035*W.rest;
+  }
+  const sx=P.sx.v*E.sqx.v*E.scale.v*mx*(1-breath*.009), sy=P.sy.v*E.sqy.v*E.scale.v*my*(1+breath*.012);
+  const angle=P.angle.v+E.tilt.v+E.bowA.v+E.shakeA.v+dA;
+  const [gx,gy]=GAZE[choice.gaze];
+  let lx=E.lookX.v,ly=E.lookY.v;
+  lx-=1.4*W.think;ly-=1.1*W.think;                       // thinking: eyes drift up-left toward the bubble
+  if(!r)lx+=Math.sin(t*5)*.9*W.work;                      // working: eyes scan like reading
+  lx+=1.4*W.send;                                         // sending: eyes follow the throw
+  const follow=1-.85*W.appr;                              // approval: looks at you, not the cursor
+  const ex=(E.curX.v*follow+lx)*gx/3, ey=(E.curY.v*follow+ly)*gy/2;
+  const a=-angle*Math.PI/180;
+  const rx=ex*Math.cos(a)-ey*Math.sin(a), ry=ex*Math.sin(a)+ey*Math.cos(a);
+  const eyeOpen=Math.max(.1,P.eye.v*(1+E.boost.v)*Math.min(E.blink.v,1.0));
+  return{x:P.x.v+E.lean.v+E.shake.v+dX,y:P.y.v+drift+E.hop.v+dY,angle,sx,sy,glow:P.glow.v,eyeOpen,rx,ry,blush:E.blush.v,aura:r?0:Math.sin(t*2.0),t,r,smile:clamp01(E.smile.v)};
+}
+function pop(el,ax,ay,s){
+  if(s<.01){el.setAttribute('display','none');return}
+  el.removeAttribute('display');
+  el.setAttribute('transform',`translate(${ax} ${ay}) scale(${s}) translate(${-ax} ${-ay})`);
+  el.setAttribute('opacity',clamp01(s));
+}
+function draw(v){
+  const t=v.t,P=E.prop;
+  for(const w of views){
+    w.pose.setAttribute('transform',`translate(${160+v.x*3} ${168+v.y*3}) rotate(${v.angle}) scale(1.4)`);
+    w.props.setAttribute('transform',`translate(${160+v.x*3} ${168+v.y*3}) scale(1.4)`);
+    w.shape.setAttribute('transform',`scale(${v.sx} ${v.sy})`);
+    const g=clamp01(v.glow),pulse=1+v.aura*.14;
+    w.halo.setAttribute('opacity',Math.min(1,g*pulse));
+    w.halo2.setAttribute('opacity',Math.min(1,g*.55*(1-v.aura*.14)));
+    w.bloom.setAttribute('opacity',Math.min(1,(.3+g*.65)*pulse));
+    w.rimglow.setAttribute('opacity',Math.min(1,(.55+g*.5)*pulse));
+    w.inner.setAttribute('opacity',.3+g*.35);
+    w.hl.setAttribute('transform',`translate(${-v.rx*.18} ${-v.ry*.18}) rotate(-30 -22 -52)`);
+    const wide=Math.min(1.12,.9+v.eyeOpen*.1), ry=Math.max(1.6,11*v.eyeOpen);
+    for(const[el,cl,ch,cx]of[[w.e1,w.c1,w.ch1,-17],[w.e2,w.c2,w.ch2,17]]){
+      const x=cx*v.sx+v.rx, y=6*v.sy+v.ry;
+      el.setAttribute('cx',x);el.setAttribute('cy',y);el.setAttribute('rx',7.5*wide);el.setAttribute('ry',ry);
+      el.setAttribute('opacity',1-v.smile);
+      cl.setAttribute('cx',x-2.4);cl.setAttribute('cy',y-ry*.38);cl.setAttribute('opacity',v.eyeOpen>.3?1-v.smile:0);
+      ch.setAttribute('cx',cx*2*v.sx+v.rx*.4);ch.setAttribute('cy',26*v.sy+v.ry*.3);ch.setAttribute('opacity',clamp01(Math.min(.85,v.blush)));
+    }
+    // happy eyes: ^ ^ arcs while smiling (done, wai)
+    for(const[arc,cx]of[[w.a[0],-17],[w.a[1],17]]){const x=cx*v.sx+v.rx,y=9*v.sy+v.ry;arc.setAttribute('d',`M${x-8} ${y+3} Q${x} ${y-10} ${x+8} ${y+3}`);arc.setAttribute('opacity',v.smile)}
+    // ---- props: each state has its own readable action ----
+    pop(w.think,60,-80,P.think.v);pop(w.work,0,0,P.work.v);pop(w.send,0,0,P.send.v);
+    pop(w.appr,66,-88,P.appr.v);pop(w.done,66,-88,P.done.v);pop(w.rest,60,-80,P.rest.v);
+    w.gear.setAttribute('transform',`translate(74 -80) rotate(${v.r?0:t*220})`);
+    const Lp=launch(t),pf=(Lp.p-.4)/.55,pv=Lp.p>.4&&Lp.p<.95;
+    w.plane.setAttribute('transform',`translate(${v.r?60:34+pf*110} ${v.r?-8:-8-pf*10}) rotate(${-8})`);w.plane.setAttribute('opacity',v.r?.9:(pv?clamp01(1-pf*pf):0));
+    const showQ=!v.r&&Math.floor(t/1.3)%2===1;w.tq.setAttribute('opacity',showQ?1:0);w.tdots.setAttribute('opacity',showQ?0:1);
+    const fa=(t-E.flashT)/.55;if(fa>=0&&fa<1){w.fl.setAttribute('r',62+fa*95);w.fl.setAttribute('opacity',(1-fa)*.9);w.fl.setAttribute('stroke-width',1+5*(1-fa))}else w.fl.setAttribute('opacity',0);
+    for(let i=0;i<3;i++){
+      w.td[i].setAttribute('opacity',v.r?.8:.25+.75*Math.max(0,Math.sin(t*4-i*.9)));          // thinking dots
+      const x=40+((t*95+i*38)%114);w.sd[i].setAttribute('cx',v.r?40+i*38:x);w.sd[i].setAttribute('cy',-6);w.sd[i].setAttribute('opacity',v.r?.8:clamp01(1-(x-40)/114)); // sending dots
+      w.z[i].setAttribute('transform',`translate(0 ${v.r?0:-((t*13+i*9)%22)})`);w.z[i].setAttribute('opacity',v.r?.8:.35+.65*Math.abs(Math.sin(t*1.2-i*.8))); // zzz
+    }
+    w.ring.setAttribute('transform',`rotate(${v.r?0:t*130})`);                               // working: orbiting light ring
+    for(let i=0;i<2;i++){const ph=v.r?.4:((t*.55)+i*.5)%1;w.ar[i].setAttribute('r',64+ph*52);w.ar[i].setAttribute('opacity',(1-ph)*.6)} // approval: slow aura waves
+    const bob=v.r?1:1+Math.sin(t*3)*.06;w.badgeA.setAttribute('transform',`translate(66 -88) scale(${bob}) translate(-66 88)`);
+    // ---- sparkles ----
+    for(let i=0;i<POOL;i++){
+      const p=parts[i],el=w.pool[i];
+      if(!p){if(el.getAttribute('opacity')!=='0')el.setAttribute('opacity','0');continue}
+      const k=p.age/p.life,a=Math.pow(clamp01(p.age/.12)*(1-k),.7);
+      const sc=p.kind==='star'?p.size*2.2*(1-.4*k):p.kind==='flame'?p.size*(1-.35*k):p.size*.7;
+      el.setAttribute('d',p.kind==='star'?STAR:p.kind==='flame'?FLAME:DOT);
+      el.setAttribute('fill',p.col);
+      el.setAttribute('transform',`translate(${p.x} ${p.y}) rotate(${p.kind==='flame'?Math.atan2(p.vy,p.vx)*180/Math.PI+90:p.rot*57.3}) scale(${sc})`);
+      el.setAttribute('opacity',a);
+    }
+  }
+}
+
+// ---------- sparkles: the aura throws light out into the dark UI ----------
+function spawn(o){if(parts.length>=POOL)parts.shift();parts.push(Object.assign({age:0,rot:Math.random()*6.28,spin:(Math.random()-.5)*3},o))}
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const COLS=['#fff9c4','#ffe14d','#ffd21a','#ffffff'];
+function rim(){const a=Math.random()*Math.PI*2;return{a,x:Math.cos(a)*54,y:Math.sin(a)*86-6}}
+function spawnFor(st){
+  const r=rim(),kind=pick(['star','flame','flame','dot']),col=pick(COLS);
+  if(st==='sending'){spawn({kind:'dot',x:24+Math.random()*30,y:-34+Math.random()*60,vx:90+Math.random()*70,vy:(Math.random()-.5)*12,life:.8,size:2.6+Math.random()*2.2,col});return}
+  const speed=st==='working'?34:12+Math.random()*14;
+  spawn({kind,x:r.x*1.03,y:r.y*1.03,vx:Math.cos(r.a)*speed,vy:Math.sin(r.a)*speed-(st==='working'?34:10),life:(st==='working'?1:1.5)+Math.random()*1.1,size:3+Math.random()*4,col});
+}
+function burst(n){
+  if(reduced()||choice.sparkle==='off')return;
+  for(let i=0;i<n;i++){const r=rim(),sp=55+Math.random()*90;spawn({kind:pick(['star','star','flame','dot']),x:r.x*.9,y:r.y*.9,vx:Math.cos(r.a)*sp,vy:Math.sin(r.a)*sp-25,life:.9+Math.random()*.9,size:4+Math.random()*4.5,col:pick(COLS)})}
+}
+function absorb(n){ // light flows into the body: files being taken in
+  if(reduced()||choice.sparkle==='off')return;
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,d=125+Math.random()*45,life=.45+Math.random()*.15,x=Math.cos(a)*d,y=Math.sin(a)*d*.9;spawn({kind:pick(['flame','star','dot']),x,y,vx:-x/life,vy:-y/life,life,size:3.5+Math.random()*3,col:pick(COLS)})}
+}
+const RATE={idle:.9,thinking:.6,working:3.4,sending:7,approval:1.4,done:3.6,resting:0};
+function updateSparks(dt){
+  for(const p of parts){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.985;p.vy*=.985;p.rot+=p.spin*dt}
+  for(let i=parts.length-1;i>=0;i--)if(parts[i].age>=parts[i].life)parts.splice(i,1);
+  if(reduced()||!E.open)return;
+  if(E.state==='sending'){const p=launch(E.elapsed).p;if(p>=.32&&E.lastP<.32)for(let i=0;i<9;i++)spawn({kind:'dot',x:22+Math.random()*26,y:-30+Math.random()*56,vx:110+Math.random()*90,vy:(Math.random()-.5)*16,life:.7,size:2.8+Math.random()*2.4,col:pick(COLS)});E.lastP=p}
+  E.acc+=RATE[E.state]*SPARK[choice.sparkle]*dt;
+  while(E.acc>=1){E.acc-=1;spawnFor(E.state)}
+}
+
+// ---------- loop ----------
+let last=performance.now(),vx=0,lastPX=null;
+function frame(now){
+  const dt=Math.min((now-last)/1000,.05);last=now;
+  if(!paused()){
+    E.elapsed+=dt;
+    const all=[...Object.values(E.pose),E.curX,E.curY,E.lookX,E.lookY,E.lean,E.tilt,E.shake,E.bowA,E.bowY,E.sqx,E.sqy,E.scale,E.blink,E.boost,E.blush,E.hop,E.shakeA,E.smile,...Object.values(E.prop)];
+    if(reduced())all.forEach(s=>s.snap());else all.forEach(s=>s.step(dt));
+    vx*=.9;updateSparks(dt);
+    if(!reduced()){
+      if(E.open&&E.elapsed>=E.nextBlink&&E.state!=='resting'){blink();if(Math.random()<1/6)later(230,blink);E.nextBlink=E.elapsed+3+Math.random()*3}
+      if(choice.bored==='keep'&&E.open&&E.state==='idle'&&E.elapsed-E.idleSince>25&&E.blink.t===1)bored(true);
+    }
+  }
+  draw(values());requestAnimationFrame(frame);
+}
+
+// ---------- motions ----------
+function blink(){E.blink.to(.12);later(90,()=>E.blink.to(1))}
+function cheek(){E.blush.to(.6);later(700,()=>E.blush.to(POSES[E.state].blush))}
+function squash(x,y,kx=0,ky=0){E.sqx.jolt(x);E.sqy.jolt(y);E.sqx.to(1);E.sqy.to(1);E.sqx.kick(kx);E.sqy.kick(ky)}
+function bored(on){if(on){E.lookY.to(.8);E.tilt.to(-3);E.boost.to(-.35)}else{E.lookY.to(0);E.tilt.to(0);E.boost.to(0)}}
+function touch(){E.idleSince=E.elapsed;bored(false)}
+function joyHop(){ // done: crouch, spring up, land, then wai
+  E.sqx.to(1.12);E.sqy.to(.84);
+  later(160,()=>{E.sqx.to(1);E.sqy.to(1);E.sqy.kick(7);E.sqx.kick(-5);E.hop.kick(-260);burst(26)});
+  later(1100,()=>{if(E.state==='done')wai(false)});
+}
+// Thai wai: bow forward with a soft light, then rise. Not a jump.
+function wai(withCaption=true){
+  if(withCaption)caption('wai',1900);
+  E.bowA.to(17);E.bowY.to(7);E.smile.to(1);cheek();
+  later(750,()=>{E.bowA.to(0);E.bowY.to(0);if(E.state!=='done')E.smile.to(0)});
+}
+const back=name=>()=>{if(E.state===name)select('idle')};
+function demoState(name,ms){touch();select(name);later(ms,back(name))}
+const M={
+  A1(){E.open=true;E.scale.jolt(.6);E.scale.to(1);squash(1.08,.92);E.blink.jolt(.05);E.blink.to(1)},
+  A2(){E.open=true;E.scale.jolt(.85);E.scale.to(1)},
+  A3(){wai();burst(10)},
+  S2(){demoState('thinking',5200)},S3(){demoState('working',5200)},S4(){demoState('sending',4200)},
+  S5(){demoState('approval',5200)},S6(){demoState('done',3600)},S7(){demoState('resting',5200)},
+  G1(){burst(30);caption('idle',900)},
+  I3(){blink()},I4(){blink();later(230,blink)},
+  I5(){bored(true);later(2200,()=>bored(false))},
+  P2(){let i=0;const path=[-1,1,-1,1,0];const tick=()=>{if(i>=path.length)return;E.curX.to(path[i]*3);E.tilt.to(-path[i]*2);E.tilt.kick(-path[i]*20);i++;later(260,tick)};tick();later(1500,()=>{E.tilt.to(0)})},
+  P3(){E.lean.to(2);E.boost.to(.08);later(1200,()=>{E.lean.to(0);E.boost.to(0)})},
+  P5(){E.curX.to(3);E.curY.to(2);E.boost.to(.08);later(1100,()=>{E.curX.to(-3);E.curY.to(1.4)});later(2200,()=>{E.curX.to(0);E.curY.to(0);E.boost.to(0)})},
+  C1(){E.sqx.to(1.07);E.sqy.to(.9);E.blink.to(.55);later(450,()=>release(1))},
+  C2(){E.sqx.to(1.07);E.sqy.to(.9);later(120,()=>{release(1);cheek()})},
+  C3(){for(let i=0;i<4;i++)later(i*220,()=>{E.sqx.to(1.07);E.sqy.to(.9);later(90,()=>release(ampFor(i+1)))})},
+  C4(){E.sqx.to(1.06);E.sqy.to(.88);E.blink.to(.08);later(1100,()=>release(1.6))},
+  C6(){E.boost.to(.08);E.blush.to(.4);later(900,()=>{E.boost.to(0);E.blush.to(POSES[E.state].blush)})},
+  E1(){absorb(20);E.sqx.to(1.14);E.sqy.to(.82);later(260,()=>{E.sqx.to(1);E.sqy.to(1);E.sqy.kick(6);E.sqx.kick(-4);E.hop.kick(-130);cheek();burst(8)});caption('drop')},
+  E2(){for(let i=0;i<4;i++)later(i*130,()=>{E.shakeA.kick(i%2?-240:240);E.lookX.to(i%2?-1:1)});later(560,()=>E.lookX.to(0));E.blink.to(.45);later(520,()=>E.blink.to(1));caption('full')},
+  E3(){E.flashT=E.elapsed;E.scale.jolt(1.12);E.scale.to(1);blink();cheek();caption('copy');burst(8)},
+  E4(){E.lookX.to(-.4);E.lookY.to(1.4);later(450,()=>{E.lookX.to(0);E.lookY.to(0)})},
+  E5(){E.hop.kick(-220);E.boost.to(.2);E.lookX.to(1);later(500,()=>{E.lookX.to(0);E.boost.to(0);select('approval')});later(5200,back('approval'))},
+  E6(){E.lookY.to(1.2);E.lookX.to(.5);later(700,()=>{E.lookX.to(0);E.lookY.to(0)})},
+  X1(){toggleOpen(false)},
+};
+let clicks=[];
+function ampFor(n){return choice.spam==='accumulate'?Math.min(1+.25*(n-1),1.6):1}
+function release(amp){E.sqx.to(1);E.sqy.to(1);E.blink.to(1);E.sqy.kick(4*amp);E.sqx.kick(-3*amp);if(amp>1)blink()}
+function toggleOpen(v){
+  E.open=v;const b=document.getElementById('toggleOpen');
+  if(!v){E.scale.to(.85);E.blink.to(.05);b.textContent='เปิด island (A2)'}
+  else{M.A2();E.blink.to(1);b.textContent='ปิด island (X1)'}
+}
+document.getElementById('toggleOpen').onclick=()=>toggleOpen(!E.open);
+
+// ---------- pointer ----------
+function center(){const r=bigHost.getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width}}
+stage.addEventListener('pointermove',e=>{
+  if(!E.open)return;touch();
+  const c=center(),dx=e.clientX-c.x,dy=e.clientY-c.y,dist=Math.hypot(dx,dy),range=Math.max(1,stage.clientWidth/2);
+  E.curX.to(Math.max(-3,Math.min(3,dx/range*3*1.6)));E.curY.to(Math.max(-2,Math.min(2,dy/range*2*1.6)));
+  if(lastPX!==null)vx=e.clientX-lastPX;lastPX=e.clientX;
+  E.tilt.to(Math.max(-2,Math.min(2,vx*.15)));
+  const near=dist<c.w*.55;
+  E.lean.to(near?Math.max(-2,Math.min(2,dx/(c.w*.55)*2)):0);E.boost.to(near?.08:0);
+});
+stage.addEventListener('pointerleave',()=>{E.curX.to(0);E.curY.to(0);E.lean.to(0);E.boost.to(0);E.tilt.to(0);lastPX=null});
+let holdTimer=null,held=false;
+bigHost.addEventListener('pointerdown',e=>{
+  touch();bigHost.setPointerCapture(e.pointerId);held=false;
+  const now=performance.now();clicks=clicks.filter(t=>now-t<1200);clicks.push(now);
+  const amp=ampFor(Math.min(clicks.length,4));
+  E.sqx.to(1+.07*amp);E.sqy.to(Math.max(.88,1-.1*amp));E.blink.to(.55);
+  holdTimer=setTimeout(()=>{held=true;E.sqy.to(.88);E.blink.to(.08)},400);
+});
+bigHost.addEventListener('pointerup',()=>{
+  clearTimeout(holdTimer);const n=Math.min(clicks.length,4);
+  if(held){release(1.6)}else{release(ampFor(n));if(n===1){blink();cheek();burst(5)}}
+});
+bigHost.addEventListener('pointercancel',()=>{clearTimeout(holdTimer);release(1)});
+
+// ---------- UI ----------
+const catalog=[
+ ['เปิดแอป / ปรากฏ',[['A1','เปิด island ครั้งแรก','โตจาก 0.6 พร้อมยุบ-ยืดและตาเปิด'],['A2','เปิดครั้งต่อไป','โตจาก 0.85 สั้นๆ'],['A3','ไหว้ทักทาย "สวัสดี"','ก้มตัวไหว้เบาๆ มีประกายและแก้มแดง (ความเป็นไทย) แล้วยืดตัวขึ้น']]],
+ ['ท่าตามสถานะ + แอนิเมชันประกอบ',[
+   ['S2','thinking · กำลังคิด','เอียงหัวส่ายไปมาช้าๆ ฟองคิดสลับ … กับ ? ตามองขึ้นไปทางฟอง'],
+   ['S3','working · กำลังทำงาน','กระโดดย่ำเบาๆ ถี่ๆ เหมือนพิมพ์ ตาไล่อ่าน เฟืองหมุน วงแสงหมุน ประกายพุ่งขึ้น'],
+   ['S4','sending · กำลังส่ง','ย่อตัว พุ่งไปข้างหน้า ปล่อยเครื่องบินกระดาษแสงและจุดแสงออกไปทางขวา วนซ้ำ'],
+   ['S5','approval · รออนุมัติ','ป้าย ! โผล่ ตาเบิกมองตรงมาที่คุณ พยักหน้าสองทีทุก 3 วินาที คลื่นออร่าแผ่ออก'],
+   ['S6','done · เสร็จแล้ว','ย่อตัวแล้วกระโดดดีใจ ประกายแตกกระจาย ตาเป็นโค้งยิ้ม ป้าย ✓ แล้วไหว้ขอบคุณ'],
+   ['S7','resting · ออฟไลน์','ล้มตัวนอน หายใจลึกช้าๆ zzz ลอยขึ้น ออร่าหรี่ลง']]],
+ ['ออร่า / ประกาย',[['G1','ปล่อยประกายออร่า','แสงเป็นดาวและเปลวแบบลายกนกพุ่งออกจากขอบตัว (ตอนอยู่เฉยๆ มีลอยออกมาเบาๆ อยู่แล้ว)']]],
+ ['อยู่เฉยๆ',[['I3','กระพริบเอง','ทุก 3–6 วินาทีแบบสุ่ม (ทำงานเองอยู่แล้ว)'],['I4','กระพริบสองครั้งติด','บางครั้ง ~1 ใน 6'],['I5','เบื่อ','เอียงและตาหรี่ครึ่ง หลังไม่มีใครแตะ 25 วินาที']]],
+ ['เมาส์เคลื่อนที่',[['P1','ตามองตามเมาส์','ลองขยับเมาส์ในกรอบดำ'],['P2','เมาส์ปัดซ้ายขวาเร็วๆ','ตาเลยเป้าเล็กน้อยและตัวเอียงตาม'],['P3','เมาส์เข้าใกล้ตัว','ตัวเอนเข้าหา ตาเบิกนิดหนึ่ง'],['P4','เมาส์ออก / หยุด','ตากลับกลาง (เอาเมาส์ออกจากกรอบ)'],['P5','ลากไฟล์ค้างเหนือ notch','ตาตามจุดลาก ระยะมองกว้างขึ้น']]],
+ ['กด / จับตัว',[['C1','กดค้าง แล้วปล่อย','ยุบ ตาหรี่ แล้วเด้งกลับ'],['C2','คลิกครั้งเดียว','ยุบเร็ว เด้งกลับ กระพริบ แก้มแดง มีประกายเล็ก'],['C3','คลิกรัว 4 ครั้ง','ตามตัวเลือก: สะสมแรง หรือแรงเท่าเดิม'],['C4','กดค้างนาน','ยุบลึก ตาปิดแน่น ปล่อยแล้วเด้งแรงกว่าปกติ'],['C6','hover ตัวมัน','ตาเบิกเล็กน้อย แก้มแดงนิดหนึ่ง']]],
+ ['เหตุการณ์ใน workspace',[['E1','วางไฟล์ลง shelf สำเร็จ','กลืนไฟล์: แสงไหลเข้าตัว ยุบลงแล้วโป่งเด้งขึ้น "วางแล้ว"'],['E2','shelf เต็ม / ไฟล์ถูกปฏิเสธ','สั่นหัวปฏิเสธ 2 รอบ ตาไล่ซ้ายขวา "เต็มแล้ว"'],['E3','Copy สำเร็จ','คลื่นแสงแผ่ออกจากตัวหนึ่งวง ตัวโป่งนิดหนึ่ง "คัดลอกแล้ว"'],['E4','สลับ section','ตาเหลือบไปทางปุ่ม rail'],['E5','คำขออนุมัติใหม่เข้ามา','ตาเบิก เหลือบไปทางแท็บ Review แล้วเข้าท่า approval'],['E6','usage เกิน 90%','ตาเหลือบไปที่การ์ด หนึ่งครั้ง']]],
+ ['ปิด / ซ่อน',[['X1','island พับเก็บ','หดเป็น 0.85 ตาปิด (ปุ่ม "ปิด island" ด้านซ้ายสลับได้)']]],
+];
+const cat=document.getElementById('catalog');
+for(const[title,items]of catalog){
+  const g=document.createElement('div');g.className='group';g.innerHTML=`<h2>${title}</h2>`;
+  for(const[id,name,desc]of items){
+    keep[id]=true;
+    const row=document.createElement('div');row.className='item';
+    row.innerHTML=`<input type="checkbox" autocomplete="off" checked aria-label="เก็บ ${id}"><div><code>${id}</code><b>${name}</b><small>${desc}</small></div>${M[id]?'<button class="play">Play</button>':'<span class="state">ลองเอง</span>'}`;
+    row.querySelector('input').onchange=e=>{keep[id]=e.target.checked;row.classList.toggle('off',!e.target.checked);summary()};
+    const b=row.querySelector('button');if(b)b.onclick=()=>{touch();M[id]()};
+    g.appendChild(row);
+  }
+  cat.appendChild(g);
+}
+const states=document.getElementById('states');
+for(const s of Object.keys(POSES)){
+  const l=document.createElement('label');l.innerHTML=`<input type="radio" autocomplete="off" name="st" value="${s}"${s==='idle'?' checked':''}>${s}`;
+  l.querySelector('input').onchange=()=>{touch();select(s)};states.appendChild(l);
+}
+document.querySelectorAll('input[name=lang]').forEach(i=>i.onchange=()=>{choice.lang=i.value;select(E.state,true);caption(E.state);summary()});
+const defs=[
+ ['bounce','ความเด้งตอนกด/วางไฟล์',[['soft','นุ่ม — แทบไม่เด้ง'],['jelly','เจลลี่ — เด้งกลับ 2–3 รอบ'],['bouncy','เด้งมาก']]],
+ ['sparkle','ประกายแสงที่พุ่งออกจากตัว',[['off','ไม่เอา'],['normal','ปกติ'],['more','เยอะ']]],
+ ['caption','คำพูดสั้นๆ ข้างตัว (ไทย/อังกฤษตามปุ่มมุมขวาบน)',[['on','แสดง'],['off','ไม่แสดง']]],
+ ['gaze','ระยะที่ตามองตามเมาส์',[['subtle','น้อย'],['normal','ปกติ'],['big','มาก']]],
+ ['spam','คลิกรัวๆ (C3)',[['accumulate','เด้งสะสมแรงขึ้น'],['constant','แรงเท่าเดิม']]],
+ ['sending','ท่า sending (S4) เลื่อนไปทางขวา',[['0','ไม่เลื่อน'],['6','6 px'],['38','38 px']]],
+ ['bored','ท่าเบื่อหลัง 25 วินาที (I5)',[['keep','เก็บไว้'],['drop','เอาออก']]],
+ ['usage','ตาเหลือบดูการ์ดเมื่อ usage เกิน 90% (E6)',[['keep','เก็บไว้'],['drop','ไม่ต้องทำ']]],
+];
+const ch=document.getElementById('choices');
+for(const[key,q,opts]of defs){
+  const d=document.createElement('div');d.className='choice';
+  d.innerHTML=`<div class="q">${q}</div><div class="opts">${opts.map(([v,t])=>`<label><input type="radio" autocomplete="off" name="c_${key}" value="${v}"${choice[key]===v?' checked':''}>${t}</label>`).join('')}</div>`;
+  d.querySelectorAll('input').forEach(i=>i.onchange=()=>{
+    choice[key]=i.value;
+    if(key==='bounce'){applyBounce();squash(1.1,.9)}
+    if(key==='sparkle')burst(18);
+    if(key==='caption')caption('wai');
+    if(key==='sending'){select('sending');later(1500,()=>select('idle'))}
+    if(key==='bored'&&i.value==='drop')bored(false);
+    summary()});
+  ch.appendChild(d);
+}
+function summary(){
+  const dropped=Object.keys(keep).filter(k=>!keep[k]);
+  document.getElementById('out').value=
+`Rice motion v3 — ตัวเลือกของเจ้าของ
+bounce: ${choice.bounce}
+sparkle: ${choice.sparkle}
+caption: ${choice.caption} (ภาษา ${choice.lang})
+gaze range: ${choice.gaze}
+click spam (C3): ${choice.spam}
+sending travel (S4): ${choice.sending} px
+bored (I5): ${choice.bored}
+usage glance (E6): ${choice.usage}
+รายการที่ไม่เอา: ${dropped.length?dropped.join(', '):'(ไม่มี เอาทั้งหมด)'}
+Reduce Motion ทดสอบแล้ว: ${reduced()?'ใช่':'ยังไม่ได้ลอง'}`;
+}
+document.getElementById('reduced').onchange=summary;
+document.getElementById('copy').onclick=async()=>{const t=document.getElementById('out');t.select();try{await navigator.clipboard.writeText(t.value)}catch{document.execCommand('copy')}};
+function init(){
+  document.querySelectorAll('#choices input').forEach(i=>{i.checked=choice[i.name.slice(2)]===i.value});
+  document.querySelectorAll('input[name=lang]').forEach(i=>i.checked=i.value===choice.lang);
+  document.getElementById('reduced').checked=false;document.getElementById('pause').checked=false;
+  applyBounce();select('idle',true);summary();
+}
+init();window.addEventListener('load',init);
+document.addEventListener('visibilitychange',()=>{last=performance.now()});
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

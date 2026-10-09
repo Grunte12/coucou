@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" role="img" aria-labelledby="t">
+  <title id="t">Rice mascot v2 (synced with motion-lab v4): white grain, glowing golden-yellow rim, breathing aura that stays inside the frame, light pool below, eyes inside the body</title>
+  <defs>
+    <radialGradient id="fill" cx=".42" cy=".36" r=".78"><stop stop-color="#fff"/><stop offset=".74" stop-color="#fff"/><stop offset=".88" stop-color="#fffdf2"/><stop offset=".95" stop-color="#fff5c4"/><stop offset="1" stop-color="#ffe680"/></radialGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff58a"/><stop offset=".4" stop-color="#ffd400"/><stop offset="1" stop-color="#ffb800"/></linearGradient>
+    <radialGradient id="bottom" cx=".5" cy="1" r=".7"><stop stop-color="#ffc800" stop-opacity=".4"/><stop offset="1" stop-color="#ffc800" stop-opacity="0"/></radialGradient>
+    <radialGradient id="halo"><stop stop-color="#ffe94d" stop-opacity=".9"/><stop offset=".5" stop-color="#ffdd33" stop-opacity=".55"/><stop offset=".74" stop-color="#ffd400" stop-opacity=".18"/><stop offset="1" stop-color="#ffd400" stop-opacity="0"/></radialGradient>
+    <radialGradient id="pool"><stop stop-color="#ffd84a" stop-opacity=".55"/><stop offset=".55" stop-color="#ffcc22" stop-opacity=".18"/><stop offset="1" stop-color="#ffcc22" stop-opacity="0"/></radialGradient>
+    <filter id="bloom" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="rimGlow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4.5"/></filter>
+    <filter id="inner" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7"/></filter>
+    <clipPath id="body"><path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z"/></clipPath>
+  </defs>
+  <ellipse cx="160" cy="284" rx="84" ry="14" fill="url(#pool)" opacity=".53"/>
+  <g transform="translate(160 168) rotate(-4) scale(1.4)">
+    <ellipse cy="-6" rx="110" ry="116" fill="url(#halo)" opacity=".37"/>
+    <ellipse cy="-6" rx="90" ry="102" fill="url(#halo)" opacity=".62"/>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="#ffcc00" opacity=".7" filter="url(#bloom)"/>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="none" stroke="#ffd21a" stroke-width="12" opacity=".83" filter="url(#rimGlow)"/>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="url(#fill)"/>
+    <g clip-path="url(#body)"><path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="none" stroke="#ffc800" stroke-width="18" opacity=".52" filter="url(#inner)"/></g>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="url(#bottom)"/>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" fill="none" stroke="url(#rim)" stroke-width="6.5"/>
+    <path d="M0 -94 C18 -94 49 -54 54 -6 C58 42 34 80 0 80 C-34 80 -58 42 -54 -6 C-49 -54 -18 -94 0 -94Z" transform="scale(.94)" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2"/>
+    <ellipse cx="-22" cy="-52" rx="12" ry="7" fill="#fff" opacity=".95" transform="rotate(-30 -22 -52)"/>
+    <circle cx="-4" cy="-70" r="3" fill="#fff" opacity=".9"/>
+    <ellipse cx="-34" cy="26" rx="9.5" ry="5.5" fill="#ff9f45" opacity=".14"/><ellipse cx="34" cy="26" rx="9.5" ry="5.5" fill="#ff9f45" opacity=".14"/>
+    <ellipse cx="-17" cy="6" rx="7.5" ry="11" fill="#2b1d05"/><ellipse cx="17" cy="6" rx="7.5" ry="11" fill="#2b1d05"/>
+    <circle cx="-19.4" cy="1.8" r="2.6" fill="#fff"/><circle cx="14.6" cy="1.8" r="2.6" fill="#fff"/>
+  </g>
+</svg>

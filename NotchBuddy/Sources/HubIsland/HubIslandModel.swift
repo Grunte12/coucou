@@ -78,6 +78,10 @@ final class HubIslandModel: ObservableObject {
 
     var heldRequestCount: Int { max(0, tincanInbox?.heldCount ?? tincanInbox?.held.count ?? 0) }
 
+    var attentionRequestCount: Int {
+        heldRequestCount + nonHeldTincanTraces.filter { $0.state.lowercased() == "needs_input" }.count
+    }
+
     var nonHeldTincanTraces: [HubTincanTraceSummary] {
         guard let inbox = tincanInbox else { return [] }
         let heldIDs = Set(inbox.held.map(\.requestID))
@@ -383,7 +387,9 @@ final class HubIslandModel: ObservableObject {
 
             if let selectedTincanTask,
                let latest = currentTincanTask(requestID: selectedTincanTask.requestID) {
+                let changed = selectedTincanTask.state != latest.state || selectedTincanTask.activityAt != latest.activityAt
                 self.selectedTincanTask = latest
+                if changed && operatorActionTask == nil { readTincanTask(latest) }
             }
             if loaded.status == .ready && loaded.enabled {
                 await refreshTincanRosterIfDue(credential: credential)

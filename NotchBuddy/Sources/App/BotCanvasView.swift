@@ -12,8 +12,17 @@ struct BotCanvasView: View {
     // One engine per view instance (main bot)
     @StateObject private var engine = BotEngine()
 
+    private var paused: Bool {
+        #if COUCOU_HUB
+        // The expanded agent workspace fades the notch Mochi to 0 and shows the
+        // rice companion instead; an invisible Mochi must not keep drawing.
+        if lookOriginOverride == nil && state.mode == .expanded && state.view == .linkHub { return true }
+        #endif
+        return state.mode == .hidden
+    }
+
     var body: some View {
-        TimelineView(.animation(paused: state.mode == .hidden)) { timeline in
+        TimelineView(.animation(paused: paused)) { timeline in
             Canvas { context, size in
                 let now = timeline.date.timeIntervalSinceReferenceDate
                 let dtRaw = min(0.05, now - engine.lastTime)

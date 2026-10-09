@@ -168,8 +168,11 @@ enum IslandConst {
     static let expandedCorner: CGFloat = 22
     #if COUCOU_HUB
     static let hubPaneHeight: CGFloat = 310
+    /// Fixed companion height in the workspace gutter, so the section rail fits below it.
+    static let hubBotY: CGFloat? = 84
     #else
     static let hubPaneHeight: CGFloat = 160
+    static let hubBotY: CGFloat? = nil
     #endif
 
     static let viewLayouts: [IslandView: ViewLayout] = [
@@ -191,7 +194,7 @@ enum IslandConst {
         .result:    ViewLayout(height: 160, botX: 52,  botY: nil, botDiameter: 44, agentMode: .column),
         .note:      ViewLayout(height: 160, botX: 60,  botY: nil, botDiameter: 50, agentMode: .column),
         .settings:  ViewLayout(height: 160, botX: 54,  botY: nil, botDiameter: 46, agentMode: .none),
-        .linkHub:   ViewLayout(height: hubPaneHeight, botX: 54, botY: nil, botDiameter: 46, agentMode: .none),
+        .linkHub:   ViewLayout(height: hubPaneHeight, botX: 54, botY: hubBotY, botDiameter: 46, agentMode: .none),
         // Greeting: bot drawn by GreetingCanvasView; no BotPlacement needed
         .greeting:  ViewLayout(height: 150, botX: 320, botY: 90,  botDiameter: 0,  agentMode: .none),
         .wardrobe:  ViewLayout(height: 160, botX: 68,  botY: nil, botDiameter: 58, agentMode: .none),

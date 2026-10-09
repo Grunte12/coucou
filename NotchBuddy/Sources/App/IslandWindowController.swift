@@ -109,25 +109,37 @@ final class IslandWindowController: NSWindowController {
             Task { @MainActor in
                 let iLoc = self?.windowToIsland(loc) ?? CGPoint(x: 320, y: 88)
                 AppState.shared.fileDragOver = true
+                #if COUCOU_HUB
+                NotificationCenter.default.post(name: .hookExpand, object: IslandView.linkHub)
+                // Folders open: stay there so a dropped folder can be pinned.
+                if !SeedFolderStore.shared.acceptsPins {
+                    NotificationCenter.default.post(name: .coucouWorkspaceShowSection, object: CoucouWorkspaceSection.shelf)
+                }
+                #else
                 // enterZone sets isActive=true BEFORE hookExpand triggers re-render,
                 // so IslandContainer sees isActive=true when state.view becomes .upload.
                 UploadSequenceEngine.shared.enterZone(x: iLoc.x, y: iLoc.y)
                 NotificationCenter.default.post(name: .hookExpand, object: IslandView.upload)
                 NotificationCenter.default.post(name: .botMorphTo, object: CGFloat(1))
+                #endif
             }
         }
         dropView.onDragUpdated = { [weak self] loc in
             Task { @MainActor in
+                #if !COUCOU_HUB
                 let iLoc = self?.windowToIsland(loc) ?? CGPoint(x: 320, y: 88)
                 UploadSequenceEngine.shared.updateCursor(x: iLoc.x, y: iLoc.y)
+                #endif
             }
         }
         dropView.onDragExited = {
             Task { @MainActor in
                 AppState.shared.fileDragOver = false
+                #if !COUCOU_HUB
                 // Do NOT collapse — drag session still active; island stays open.
                 NotificationCenter.default.post(name: .botMorphTo, object: CGFloat(0))
                 UploadSequenceEngine.shared.exitZone()
+                #endif
             }
         }
         dropView.onFilesDropped = { urls in
@@ -193,7 +205,15 @@ final class IslandWindowController: NSWindowController {
                 }
 
             case .coucou:
+                #if COUCOU_HUB
+                // Seed greets with a wai in place; the notch stays as it is.
+                NotificationCenter.default.post(name: .seedGreet, object: nil)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+                    NotificationCenter.default.post(name: .greetComplete, object: nil)
+                }
+                #else
                 self.expand(to: .greeting)
+                #endif
             }
         }
 
@@ -1015,6 +1035,12 @@ final class IslandWindowController: NSWindowController {
 
     private func isBotHit(_ windowPoint: CGPoint) -> Bool {
         let s = AppState.shared
+        #if COUCOU_HUB
+        // No Mochi in this build: no slap, no drag to the desktop, no wardrobe.
+        // Seed handles its own presses in the workspace; a click on the strip opens the notch.
+        _ = s
+        return false
+        #else
         let panelH = window?.frame.height ?? 320
         let panelW = window?.frame.width  ?? 720
         let (islandW, fixedH) = islandSize(mode: s.mode, view: s.view,
@@ -1040,6 +1066,7 @@ final class IslandWindowController: NSWindowController {
         let dx = windowPoint.x - botX
         let dy = windowPoint.y - botY
         return dx*dx + dy*dy <= radius * radius
+        #endif
     }
 
     // MARK: - Notch detection (static)

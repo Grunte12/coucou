@@ -7,6 +7,19 @@ struct IslandViewContent: View {
     @ObservedObject var state: AppState
 
     var body: some View {
+        #if COUCOU_HUB
+        // Seed's own cards for terminal agents, and the workspace. The root keeps a
+        // view alive for every IslandView case, so each case maps to exactly one
+        // view: Coucou's other views are empty here (one workspace, one Seed).
+        switch view {
+        case .linkHub:  CoucouHubPane(state: state)
+        case .approval: SeedApprovalCard(state: state)
+        case .question: SeedQuestionCard(state: state)
+        case .finished: SeedFinishedCard(state: state)
+        case .error, .confused: SeedBusyCard()
+        default:        EmptyView()
+        }
+        #else
         switch view {
         case .overview:  OverviewView(state: state)
         case .empty:     EmptyStateView(state: state)
@@ -33,6 +46,7 @@ struct IslandViewContent: View {
         case .greeting:  EmptyView()  // GreetingCanvasView overlaid in IslandRootView
         case .wardrobe:  WardrobeView(state: state)
         }
+        #endif
     }
 }
 

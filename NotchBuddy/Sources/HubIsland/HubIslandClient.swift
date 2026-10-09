@@ -140,6 +140,22 @@ struct HubTincanTraceSummary: Decodable, Equatable, Identifiable, Sendable {
     let state: String
     let title: String
     let createdAt: String
+    let updatedAt: String?
+    let fromSession: String?
+    let toSession: String?
+    let project: String?
+    let model: String?
+
+    var activityAt: String { updatedAt ?? createdAt }
+
+    init(id: String, requestID: String, traceID: String, sender: String, recipient: String,
+         state: String, title: String, createdAt: String, updatedAt: String? = nil,
+         fromSession: String? = nil, toSession: String? = nil, project: String? = nil, model: String? = nil) {
+        self.id = id; self.requestID = requestID; self.traceID = traceID
+        self.sender = sender; self.recipient = recipient; self.state = state; self.title = title
+        self.createdAt = createdAt; self.updatedAt = updatedAt
+        self.fromSession = fromSession; self.toSession = toSession; self.project = project; self.model = model
+    }
 
     enum CodingKeys: String, CodingKey {
         case id, state, title
@@ -148,6 +164,10 @@ struct HubTincanTraceSummary: Decodable, Equatable, Identifiable, Sendable {
         case sender = "from"
         case recipient = "to"
         case createdAt = "created_at"
+        case updatedAt = "updated_at"
+        case fromSession = "from_session"
+        case toSession = "to_session"
+        case project, model
     }
 }
 
